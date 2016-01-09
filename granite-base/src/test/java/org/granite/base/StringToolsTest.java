@@ -14,18 +14,24 @@
  * limitations under the License.
  */
 
-package org.granite.io;
+package org.granite.base;
 
-import java.io.File;
+import org.junit.Test;
 
-public class FileTools {
+import static org.junit.Assert.*;
 
-    public static boolean fileExistsAndCanRead(final String filePath) {
-        return fileExistsAndCanRead(new File(filePath));
+public class StringToolsTest {
+
+    @Test
+    public void testIsNullOrEmpty() throws Exception {
+        String test1 = null;
+        String test2 = "      ";
+        String test3 = "   askjdh";
+        String test4 = "test     ";
+
+        assertTrue(StringTools.isNullOrEmpty(test1));
+        assertTrue(StringTools.isNullOrEmpty(test2));
+        assertFalse(StringTools.isNullOrEmpty(test3));
+        assertFalse(StringTools.isNullOrEmpty(test4));
     }
-
-    public static boolean fileExistsAndCanRead(final File file) {
-        return file != null && file.exists() && file.isFile() && file.canRead();
-    }
-
 }
