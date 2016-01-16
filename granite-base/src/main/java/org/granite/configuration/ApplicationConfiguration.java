@@ -38,7 +38,7 @@ public final class ApplicationConfiguration implements Serializable {
     }
 
     public int getInt(final String configKey, final int defaultValue){
-        final String configValueString = getString(configKey);
+        final String configValueString = getString(configKey, null);
 
         return configValueString == null ? defaultValue : Integer.valueOf(configValueString);
     }
@@ -48,7 +48,7 @@ public final class ApplicationConfiguration implements Serializable {
     }
 
     public long getLong(final String configKey, final long defaultValue){
-        final String configValueString = getString(configKey);
+        final String configValueString = getString(configKey, null);
 
         return configValueString == null ? defaultValue : Long.valueOf(configValueString);
     }
@@ -58,7 +58,7 @@ public final class ApplicationConfiguration implements Serializable {
     }
 
     public double getDouble(final String configKey, final double defaultValue){
-        final String configValueString = getString(configKey);
+        final String configValueString = getString(configKey, null);
 
         return configValueString == null ? defaultValue : Double.valueOf(configValueString);
     }
@@ -68,7 +68,7 @@ public final class ApplicationConfiguration implements Serializable {
     }
 
     public boolean getBoolean(final String configKey, final boolean defaultValue){
-        final String configValueString = getString(configKey);
+        final String configValueString = getString(configKey, null);
 
         return configValueString == null ? defaultValue : Boolean.valueOf(configValueString);
     }
