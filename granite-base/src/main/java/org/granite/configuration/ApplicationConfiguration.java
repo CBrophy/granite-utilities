@@ -34,59 +34,44 @@ public final class ApplicationConfiguration implements Serializable {
     }
 
     public long getInt(final String configKey){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
-
-        checkNotNull(configValueString ,"Required config key %s not present", configKey);
-
-        return Integer.valueOf(configValueString);
+        return Integer.valueOf(getString(configKey));
     }
 
     public int getInt(final String configKey, final int defaultValue){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
+        final String configValueString = getString(configKey);
 
         return configValueString == null ? defaultValue : Integer.valueOf(configValueString);
     }
 
     public long getLong(final String configKey){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
-
-        checkNotNull(configValueString ,"Required config key %s not present", configKey);
-
-        return Long.valueOf(configValueString);
+        return Long.valueOf(getString(configKey));
     }
 
     public long getLong(final String configKey, final long defaultValue){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
+        final String configValueString = getString(configKey);
 
         return configValueString == null ? defaultValue : Long.valueOf(configValueString);
     }
 
     public double getDouble(final String configKey){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
-
-        checkNotNull(configValueString ,"Required config key %s not present", configKey);
-
-        return Double.valueOf(configValueString);
+        return Double.valueOf(getString(configKey));
     }
 
     public double getDouble(final String configKey, final double defaultValue){
-        checkNotNull(configKey, "configKey");
-
-        final String configValueString = configMap.get(configKey);
+        final String configValueString = getString(configKey);
 
         return configValueString == null ? defaultValue : Double.valueOf(configValueString);
     }
 
+    public boolean getBoolean(final String configKey){
+        return Boolean.valueOf(getString(configKey));
+    }
+
+    public boolean getBoolean(final String configKey, final boolean defaultValue){
+        final String configValueString = getString(configKey);
+
+        return configValueString == null ? defaultValue : Boolean.valueOf(configValueString);
+    }
 
     public String getString(final String configKey){
         checkNotNull(configKey, "configKey");
