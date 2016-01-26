@@ -1,7 +1,20 @@
+plugins {
+    id 'pl.allegro.tech.build.axion-release' version '1.3.4'
+}
+
+scmVersion {
+    tag {
+        prefix = 'granite-utilities'
+    }
+
+    versionCreator 'versionWithBranch'
+}
 
 subprojects {
+
     group 'org.granite'
-    version '1.0-SNAPSHOT'
+
+    version = scmVersion.version
 
     apply plugin: 'java'
     apply plugin: 'maven'
