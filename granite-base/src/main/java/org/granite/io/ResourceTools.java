@@ -16,22 +16,19 @@
 
 package org.granite.io;
 
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Resources;
+
 import org.granite.base.StringTools;
 
 import java.io.*;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public final class ResourceTools implements Serializable {
 
@@ -41,15 +38,20 @@ public final class ResourceTools implements Serializable {
     public static InputStream readResource(final String resourceName) {
         checkNotNull(resourceName, "resourceName");
 
-        final URL resourceUrl = Resources.getResource(resourceName);
-
-        checkNotNull(resourceUrl, "Unknown resource: %s", resourceName);
-
         try {
+
+            final URL resourceUrl = Resources.getResource(resourceName);
+
+            checkNotNull(resourceUrl, "Unknown resource: %s", resourceName);
+
             return Resources.asByteSource(resourceUrl).openStream();
         } catch (IOException e) {
             throw Throwables.propagate(e);
+        } catch (IllegalArgumentException ignored) {
+            System.out.println(String.format("Resource %s does not exist", resourceName));
         }
+
+        return null;
     }
 
     public static List<String> readResourceTextFile(final String resourceName) {
@@ -57,8 +59,15 @@ public final class ResourceTools implements Serializable {
         checkNotNull(resourceName, "resourceName");
 
         try {
-            final InputStream inputStream = resourceName.endsWith(".gz") ? new GZIPInputStream(
-                    readResource(resourceName)) : readResource(resourceName);
+            InputStream inputStream = readResource(resourceName);
+
+            if(inputStream == null) {
+                return ImmutableList.of();
+            }
+
+            if(resourceName.endsWith(".gz")) {
+                inputStream = new GZIPInputStream(inputStream);
+            }
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
 
