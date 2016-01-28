@@ -16,11 +16,13 @@
 
 package org.granite.io;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 
 import org.granite.base.StringTools;
+import org.granite.log.LogTools;
 
 import java.io.*;
 import java.net.URL;
@@ -48,7 +50,7 @@ public final class ResourceTools implements Serializable {
         } catch (IOException e) {
             throw Throwables.propagate(e);
         } catch (IllegalArgumentException ignored) {
-            System.out.println(String.format("Resource %s does not exist", resourceName));
+            LogTools.warn("Resource {0} does not exist", resourceName);
         }
 
         return null;
@@ -61,11 +63,11 @@ public final class ResourceTools implements Serializable {
         try {
             InputStream inputStream = readResource(resourceName);
 
-            if(inputStream == null) {
+            if (inputStream == null) {
                 return ImmutableList.of();
             }
 
-            if(resourceName.endsWith(".gz")) {
+            if (resourceName.endsWith(".gz")) {
                 inputStream = new GZIPInputStream(inputStream);
             }
 
@@ -96,7 +98,7 @@ public final class ResourceTools implements Serializable {
 
         checkNotNull(resourceName, "resourceName");
 
-        return StringTools.convertStringsToMap(readResourceTextFile(resourceName), '=');
+        return StringTools.convertStringsToMap(readResourceTextFile(resourceName), CharMatcher.is('='), false);
 
     }
 }

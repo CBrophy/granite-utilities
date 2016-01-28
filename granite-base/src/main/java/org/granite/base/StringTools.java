@@ -15,6 +15,7 @@
  */
 package org.granite.base;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 
@@ -27,15 +28,16 @@ import static com.google.common.base.Preconditions.checkState;
 
 public final class StringTools implements Serializable {
 
-    private StringTools(){}
+    private StringTools() {
+    }
 
-    public static boolean isNullOrEmpty(final String value){
+    public static boolean isNullOrEmpty(final String value) {
         return value == null || value.trim().isEmpty();
     }
 
-    public static Map<String, String> convertStringsToMap(final List<String> lines, final char delimiter){
+    public static Map<String, String> convertStringsToMap(final List<String> lines, final CharMatcher delimiter, final boolean omitEmptyValues) {
 
-        if(lines == null || lines.isEmpty()) return ImmutableMap.of();
+        if (lines == null || lines.isEmpty()) return ImmutableMap.of();
 
         final Splitter equalsSplitter = Splitter.on(delimiter).trimResults();
 
@@ -49,7 +51,7 @@ public final class StringTools implements Serializable {
 
             checkState(lineParts.size() <= 2, "Too many %s delimiters on line: %s", delimiter, resourceLine);
 
-            if (lineParts.size() == 0) {
+            if (lineParts.size() == 0 || (lineParts.size() == 1 && omitEmptyValues)) {
                 continue;
             }
 

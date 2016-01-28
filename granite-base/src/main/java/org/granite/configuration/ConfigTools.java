@@ -15,9 +15,12 @@
  */
 package org.granite.configuration;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.google.common.io.Files;
+
 import org.granite.base.StringTools;
 import org.granite.io.FileTools;
 import org.granite.io.ResourceTools;
@@ -28,6 +31,8 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class ConfigTools implements Serializable {
 
@@ -40,11 +45,11 @@ public final class ConfigTools implements Serializable {
         final HashMap<String, String> result = new HashMap<>();
 
         for (String resource : resources) {
-            result.putAll(ResourceTools.readResourceTextFileAsMap(resource));
+            mergeConfigMaps(ResourceTools.readResourceTextFileAsMap(resource), result);
         }
 
         // Read anything from an external config file
-        result.putAll(readConfigFileLines(configFile));
+        mergeConfigMaps(readConfigFileLines(configFile), result);
 
         // Check for system properties overrides
         // for the known configuration options and apply them
@@ -52,7 +57,7 @@ public final class ConfigTools implements Serializable {
         for (String configKey : result.keySet()) {
             final String overrideValue = System.getProperties().getProperty(configKey, "");
 
-            if(!StringTools.isNullOrEmpty(overrideValue)){
+            if (!StringTools.isNullOrEmpty(overrideValue)) {
                 result.put(configKey, overrideValue.trim());
             }
         }
@@ -61,16 +66,41 @@ public final class ConfigTools implements Serializable {
 
     }
 
-    private static Map<String, String> readConfigFileLines(final String configFile){
-        if(StringTools.isNullOrEmpty(configFile) || !FileTools.fileExistsAndCanRead(configFile)) return ImmutableMap.of();
+    private static Map<String, String> readConfigFileLines(final String configFile) {
+        if (StringTools.isNullOrEmpty(configFile) || !FileTools.fileExistsAndCanRead(configFile))
+            return ImmutableMap.of();
 
         try {
 
-            return StringTools.convertStringsToMap(Files.readLines(new File(configFile), Charset.defaultCharset()), '=');
+            return StringTools.convertStringsToMap(Files.readLines(new File(configFile), Charset.defaultCharset()), CharMatcher.is('='), false);
 
         } catch (IOException e) {
             throw Throwables.propagate(e);
         }
+    }
+
+    private static void mergeConfigMaps(final Map<String, String> source, final HashMap<String, String> destination) {
+        checkNotNull(source, "source");
+        checkNotNull(destination, "destination");
+
+        if (source.isEmpty()) {
+            return;
+        }
+
+        final Sets.SetView<String> sharedKeys = Sets.intersection(source.keySet(), destination.keySet());
+        final Sets.SetView<String> newKeys = Sets.difference(source.keySet(), destination.keySet());
+
+        // skip empty values in the source map
+        // if they are already in the destination in order to
+        // prevent overwrites of populated keys with empty ones
+        sharedKeys
+                .stream()
+                .filter(key -> !source.get(key).trim().isEmpty())
+                .forEach(key -> destination.put(key, source.get(key)));
+
+        // Add new keys regardless of whether or not they're empty
+        newKeys
+                .forEach(key -> destination.put(key, source.get(key).trim()));
     }
 
 
