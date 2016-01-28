@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 public final class StringTools implements Serializable {
@@ -35,21 +36,26 @@ public final class StringTools implements Serializable {
         return value == null || value.trim().isEmpty();
     }
 
-    public static Map<String, String> convertStringsToMap(final List<String> lines, final CharMatcher delimiter, final boolean omitEmptyValues) {
+    public static Map<String, String> convertStringsToMap(
+            final List<String> lines,
+            final CharMatcher keyValueDelimiter,
+            final boolean omitEmptyValues) {
+
+        checkNotNull(keyValueDelimiter, "keyValueDelimiter");
 
         if (lines == null || lines.isEmpty()) return ImmutableMap.of();
 
-        final Splitter equalsSplitter = Splitter.on(delimiter).trimResults();
+        final Splitter equalsSplitter = Splitter.on(keyValueDelimiter).trimResults();
 
         final HashMap<String, String> result = new HashMap<>();
 
-        for (String resourceLine : lines) {
-            // Lines are expected to have a maximum of 1 equal sign
-            // i.e. this = that
+        for (String line : lines) {
+            // Lines are expected to have a maximum of 1 delimiter
+            // i.e. this = that where '=' is the delimiter
             // such that lineParts should never be more than 2 units in size
-            final List<String> lineParts = equalsSplitter.splitToList(resourceLine);
+            final List<String> lineParts = equalsSplitter.splitToList(line);
 
-            checkState(lineParts.size() <= 2, "Too many %s delimiters on line: %s", delimiter, resourceLine);
+            checkState(lineParts.size() <= 2, "Too many %s delimiters on line: %s", keyValueDelimiter, line);
 
             if (lineParts.size() == 0 || (lineParts.size() == 1 && omitEmptyValues)) {
                 continue;

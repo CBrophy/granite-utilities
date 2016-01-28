@@ -67,6 +67,8 @@ public final class ResourceTools implements Serializable {
                 return ImmutableList.of();
             }
 
+            LogTools.info("Reading from embedded resource: {0}", resourceName);
+
             if (resourceName.endsWith(".gz")) {
                 inputStream = new GZIPInputStream(inputStream);
             }

@@ -24,6 +24,7 @@ import com.google.common.io.Files;
 import org.granite.base.StringTools;
 import org.granite.io.FileTools;
 import org.granite.io.ResourceTools;
+import org.granite.log.LogTools;
 
 import java.io.File;
 import java.io.IOException;
@@ -71,6 +72,7 @@ public final class ConfigTools implements Serializable {
             return ImmutableMap.of();
 
         try {
+            LogTools.info("Reading config values from file {0}", configFile);
 
             return StringTools.convertStringsToMap(Files.readLines(new File(configFile), Charset.defaultCharset()), CharMatcher.is('='), false);
 
