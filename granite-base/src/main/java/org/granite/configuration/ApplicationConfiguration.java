@@ -33,7 +33,7 @@ public final class ApplicationConfiguration implements Serializable {
         return configMap;
     }
 
-    public long getInt(final String configKey){
+    public int getInt(final String configKey){
         return Integer.valueOf(getString(configKey));
     }
 
