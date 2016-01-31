@@ -50,10 +50,15 @@ public final class StringTools implements Serializable {
         final HashMap<String, String> result = new HashMap<>();
 
         for (String line : lines) {
+
+            final String trimmed = line.trim();
+
+            if(trimmed.isEmpty()) continue;
+
             // Lines are expected to have a maximum of 1 delimiter
             // i.e. this = that where '=' is the delimiter
             // such that lineParts should never be more than 2 units in size
-            final List<String> lineParts = equalsSplitter.splitToList(line);
+            final List<String> lineParts = equalsSplitter.splitToList(trimmed);
 
             checkState(lineParts.size() <= 2, "Too many %s delimiters on line: %s", keyValueDelimiter, line);
 

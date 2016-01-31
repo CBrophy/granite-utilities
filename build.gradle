@@ -35,3 +35,9 @@ subprojects {
 project(':granite-base') {
 
 }
+
+project(':granite-sql') {
+    dependencies {
+        compile project(':granite-base')
+    }
+}

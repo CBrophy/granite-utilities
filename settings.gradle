@@ -1,1 +1,2 @@
 include ":granite-base"
+include ":granite-sql"

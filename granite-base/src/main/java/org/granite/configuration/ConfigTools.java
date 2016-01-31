@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -74,7 +75,13 @@ public final class ConfigTools implements Serializable {
         try {
             LogTools.info("Reading config values from file {0}", configFile);
 
-            return StringTools.convertStringsToMap(Files.readLines(new File(configFile), Charset.defaultCharset()), CharMatcher.is('='), false);
+            return StringTools.convertStringsToMap(
+                    Files.readLines(new File(configFile), Charset.defaultCharset())
+                            .stream()
+                            .filter(line -> !line.trim().startsWith("#")) // remove comments
+                            .collect(Collectors.toList()),
+                    CharMatcher.is('='),
+                    false);
 
         } catch (IOException e) {
             throw Throwables.propagate(e);
@@ -97,11 +104,13 @@ public final class ConfigTools implements Serializable {
         // prevent overwrites of populated keys with empty ones
         sharedKeys
                 .stream()
-                .filter(key -> !source.get(key).trim().isEmpty())
+                .filter(key -> !source.get(key).trim().isEmpty() && !key.startsWith("#"))
                 .forEach(key -> destination.put(key, source.get(key)));
 
         // Add new keys regardless of whether or not they're empty
         newKeys
+                .stream()
+                .filter(key -> !key.startsWith("#"))
                 .forEach(key -> destination.put(key, source.get(key).trim()));
     }
 
