@@ -15,15 +15,18 @@
  */
 package org.granite.math;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Ordering;
 import com.google.common.math.DoubleMath;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class QuantileTools implements Serializable {
+public final class PercentileTools implements Serializable {
 
     public static double[] findQuantiles(final List<Double> sortedValues, final int quantileCount) {
         checkNotNull(sortedValues, "sortedValues");
@@ -71,6 +74,32 @@ public final class QuantileTools implements Serializable {
         }
 
         return percentile;
+
+    }
+
+    public static <T extends Comparable<T>> ImmutableMap<T, Double> findPercentiles(final Iterable<T> items, final int precision, final boolean complement) {
+        checkNotNull(items, "items");
+
+        final TreeSet<T> sortedItems = new TreeSet<>(complement ? Ordering.natural().reverse() : Ordering.natural());
+
+        items.forEach(sortedItems::add);
+
+        if (sortedItems.isEmpty()) return ImmutableMap.of();
+
+        final double n = sortedItems.size();
+
+        int position = 1;
+
+        final ImmutableMap.Builder<T, Double> result = ImmutableMap.builder();
+
+        while (!sortedItems.isEmpty()) {
+            final T item = sortedItems.pollFirst();
+            final double percentile = MathTools.round((double) position / n, precision);
+            result.put(item, percentile);
+            position++;
+        }
+
+        return result.build();
 
     }
 
