@@ -32,7 +32,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class RecordSetTools<T> implements Serializable {
+public class RecordSetTools implements Serializable {
 
     private final Connection connection;
 
@@ -51,7 +51,7 @@ public class RecordSetTools<T> implements Serializable {
      * @param <K>                          the key type
      * @return an immutable map of records from the query result set
      */
-    public <K> ImmutableMap<K, T> readQueryRecordsAsMap(
+    public <K,T> ImmutableMap<K, T> readQueryRecordsAsMap(
             final String query,
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
@@ -97,7 +97,7 @@ public class RecordSetTools<T> implements Serializable {
      * @param <K>                          the key type
      * @return an immutable multimap of records from the query result set
      */
-    public <K> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
+    public <K,T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
             final String query,
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
@@ -140,7 +140,7 @@ public class RecordSetTools<T> implements Serializable {
      *                                     record
      * @return a list of the deserialized types, ordered by the resultset query order
      */
-    public ImmutableList<T> readQueryRecords(final String query,
+    public <T> ImmutableList<T> readQueryRecords(final String query,
                                              final Function<ResultSet, T> createRecordInstanceFunction) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
@@ -179,7 +179,7 @@ public class RecordSetTools<T> implements Serializable {
      *                              executable sql query to run
      * @return the number of rows affected by the write request
      */
-    public int writeRecords(final Iterable<T> sourceCollection,
+    public <T> int writeRecords(final Iterable<T> sourceCollection,
                             final String parameterizedStatement,
                             final Function<T, Object[]> serializeToParamArray) {
         checkNotNull(sourceCollection, "sourceCollection");
