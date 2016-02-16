@@ -33,7 +33,7 @@ public final class PercentileTools implements Serializable {
 
         if (sortedValues.isEmpty()) return new double[]{};
 
-        checkArgument(quantileCount > 1 && sortedValues.size() > quantileCount, "quantileCount must be greater than 1 and smaller than the number of elements");
+        checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount, "quantileCount must be greater than 1 and smaller than the number of elements");
 
         final double[] result = new double[quantileCount - 1];
 

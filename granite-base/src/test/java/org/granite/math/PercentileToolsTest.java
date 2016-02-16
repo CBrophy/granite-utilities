@@ -53,6 +53,10 @@ public class PercentileToolsTest {
         assertEquals(0.55, quartilesEven[1], 0.0);
         assertEquals(0.75, quartilesEven[2], 0.0);
 
+        double[] median = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0), 2);
+
+        assertEquals(0.5, median[0],0.0);
+
     }
 
     @Test
