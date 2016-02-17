@@ -32,4 +32,25 @@ public class VectorTools {
     public static double angularSimilarity(final double[] vector1, final double[] vector2){
         return 1.0 - (Math.acos(cosine(vector1, vector2)) / Math.PI);
     }
+
+    public static double[] distanceVector(final double[] vector1, final double[] vector2) {
+        checkNotNull(vector1, "vector1");
+        checkNotNull(vector2, "vector2");
+        checkArgument(vector1.length == vector2.length, "distance vector requires vectors of similar length");
+        checkArgument(vector1.length > 0, "cannot find distance vector of empty vectors");
+
+        double[] distance = new double[vector1.length];
+
+        for (int i = 0; i < vector1.length; i++) {
+            distance[i] = vector1[i] - vector2[i];
+        }
+
+        return distance;
+    }
+
+    public static double euclideanDistance(final double[] vector1, final double[] vector2){
+        return norm(distanceVector(vector1, vector2));
+    }
+
+
 }

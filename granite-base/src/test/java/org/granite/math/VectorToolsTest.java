@@ -36,4 +36,18 @@ public class VectorToolsTest {
 
         assertEquals(expectedDotProduct / (expectedNorm1 * expectedNorm2), VectorTools.cosine(vector1, vector2), 0.0);
     }
+
+    @Test
+    public void testDistanceVector(){
+        double[] vector1 = new double[]{1,2,3};
+        double[] vector2 = new double[]{2,3,4};
+
+        double[] expected = new double[]{1.0-2.0,2.0-3.0,3.0-4.0};
+
+        double[] distance = VectorTools.distanceVector(vector1, vector2);
+
+        for(int i = 0; i < vector1.length; i++){
+            assertEquals(expected[i], distance[i],0.0);
+        }
+    }
 }
