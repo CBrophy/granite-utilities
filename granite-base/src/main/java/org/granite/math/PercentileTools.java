@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class PercentileTools implements Serializable {
 
-    public static double[] findQuantiles(final List<Double> sortedValues, final int quantileCount) {
+    public static double[] findQuantiles(final List<? extends Number> sortedValues, final int quantileCount) {
         checkNotNull(sortedValues, "sortedValues");
 
         if (sortedValues.isEmpty()) return new double[]{};
@@ -44,9 +44,9 @@ public final class PercentileTools implements Serializable {
         for (int index = 0; index < quantileCount - 1; index++) {
 
             if (sortedValues.size() % 2 == 0) {
-                result[index] = DoubleMath.mean(sortedValues.get(currentQuantileIndex), sortedValues.get(currentQuantileIndex + 1));
+                result[index] = DoubleMath.mean(sortedValues.get(currentQuantileIndex).doubleValue(), sortedValues.get(currentQuantileIndex + 1).doubleValue());
             } else {
-                result[index] = sortedValues.get(currentQuantileIndex);
+                result[index] = sortedValues.get(currentQuantileIndex).doubleValue();
             }
 
             currentQuantileIndex += rank;
