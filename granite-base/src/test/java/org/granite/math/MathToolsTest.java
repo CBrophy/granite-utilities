@@ -57,4 +57,10 @@ public class MathToolsTest {
         assertEquals(5.0, mean2, 0.0);
         assertEquals(2.0, mean3, 0.0);
     }
+
+    @Test
+    public void testIsBetween(){
+        assertTrue(MathTools.isBetween(0.1,0.0,1.0));
+        assertFalse(MathTools.isBetween(0.0,0.1,1.0));
+    }
 }
