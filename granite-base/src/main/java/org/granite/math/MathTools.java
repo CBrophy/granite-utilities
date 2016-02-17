@@ -19,6 +19,12 @@ import com.google.common.math.DoubleMath;
 
 import java.io.Serializable;
 import java.math.RoundingMode;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public final class MathTools implements Serializable {
 
@@ -41,4 +47,23 @@ public final class MathTools implements Serializable {
     public static double minMaxBound(final double value, final double min, final double max) {
         return Math.max(Math.min(value, max), min);
     }
+
+    public static double mean(final Iterable<? extends Number> values){
+        checkNotNull(values, "values");
+
+        double sum = 0.0;
+        int count = 0;
+
+        for (Number value : values) {
+            sum += value.doubleValue();
+            count++;
+        }
+
+        checkState(count > 0, "Cannot find the mean of zero items");
+
+        return sum / (double)count;
+    }
+
+
+
 }
