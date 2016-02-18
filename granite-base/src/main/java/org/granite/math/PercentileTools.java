@@ -40,24 +40,19 @@ public final class PercentileTools implements Serializable {
         // 2 quantiles = .5
         // 3 quantiles = .33
         // 4 quantiles = .25
-        double indexIncrement = 1.0 / (double) quantileCount;
+        // ...etc
+        double phi = 1.0 / (double) quantileCount;
 
         for (int currentQuantile = 1; currentQuantile < quantileCount; currentQuantile++) {
 
-            final double indexCoefficient = indexIncrement * (double) currentQuantile;
-
-            final double index = indexCoefficient * (sortedValues.size() + 1);
+            final double index = phi * (double) currentQuantile * (sortedValues.size() + 1);
 
             final int indexInteger = (int) index;
 
-            final double indexDecimal = index - indexInteger;
-
-            final int zeroBasedIndex = indexInteger - 1;
-
-            if (indexDecimal == 0.0) { // it's a whole number, so just return the value at the zero-based index
-                result[currentQuantile - 1] = sortedValues.get(zeroBasedIndex).doubleValue();
+            if (index - indexInteger == 0.0) { // it's a whole number, so just return the value at the zero-based index
+                result[currentQuantile - 1] = sortedValues.get(indexInteger - 1).doubleValue();
             } else {
-                result[currentQuantile - 1] = DoubleMath.mean(sortedValues.get(zeroBasedIndex).doubleValue(), sortedValues.get(zeroBasedIndex + 1).doubleValue());
+                result[currentQuantile - 1] = DoubleMath.mean(sortedValues.get(indexInteger - 1).doubleValue(), sortedValues.get(indexInteger).doubleValue());
 
             }
 
