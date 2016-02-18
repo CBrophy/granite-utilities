@@ -37,19 +37,30 @@ public final class PercentileTools implements Serializable {
 
         final double[] result = new double[quantileCount - 1];
 
-        final int rank = (int) MathTools.round((double) sortedValues.size() / (double) quantileCount, 0);
+        // 2 quantiles = .5
+        // 3 quantiles = .33
+        // 4 quantiles = .25
+        double indexIncrement = 1.0 / (double) quantileCount;
 
-        int currentQuantileIndex = rank - 1;
+        for (int currentQuantile = 1; currentQuantile < quantileCount; currentQuantile++) {
 
-        for (int index = 0; index < quantileCount - 1; index++) {
+            final double indexCoefficient = indexIncrement * (double) currentQuantile;
 
-            if (sortedValues.size() % 2 == 0) {
-                result[index] = DoubleMath.mean(sortedValues.get(currentQuantileIndex).doubleValue(), sortedValues.get(currentQuantileIndex + 1).doubleValue());
+            final double index = indexCoefficient * (sortedValues.size() + 1);
+
+            final int indexInteger = (int) index;
+
+            final double indexDecimal = index - indexInteger;
+
+            final int zeroBasedIndex = indexInteger - 1;
+
+            if (indexDecimal == 0.0) { // it's a whole number, so just return the value at the zero-based index
+                result[currentQuantile - 1] = sortedValues.get(zeroBasedIndex).doubleValue();
             } else {
-                result[index] = sortedValues.get(currentQuantileIndex).doubleValue();
+                result[currentQuantile - 1] = DoubleMath.mean(sortedValues.get(zeroBasedIndex).doubleValue(), sortedValues.get(zeroBasedIndex + 1).doubleValue());
+
             }
 
-            currentQuantileIndex += rank;
         }
 
         return result;

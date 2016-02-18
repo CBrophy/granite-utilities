@@ -55,12 +55,24 @@ public class PercentileToolsTest {
 
         double[] median = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0), 2);
 
-        assertEquals(0.5, median[0],0.0);
+        assertEquals(0.5, median[0], 0.0);
+
+        double[] quartiles = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0, 2.0, 3.0), 4);
+
+        assertEquals(0.5, quartiles[0], 0.01);
+        assertEquals(1.5, quartiles[1], 0.01);
+        assertEquals(2.5, quartiles[2], 0.01);
+
+        double[] quartiles2 = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0, 5.0), 4);
+
+        assertEquals(0.5, quartiles[0], 0.01);
+        assertEquals(1.5, quartiles[1], 0.01);
+        assertEquals(2.5, quartiles[2], 0.01);
 
     }
 
     @Test
-    public void testFindPercentile(){
+    public void testFindPercentile() {
         double[] quartilesOdd = PercentileTools.findQuantiles(testList1, 4);
         double[] quartilesEven = PercentileTools.findQuantiles(testList2, 4);
 
