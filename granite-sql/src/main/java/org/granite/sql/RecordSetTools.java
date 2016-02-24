@@ -228,7 +228,10 @@ public class RecordSetTools implements Serializable {
 
             return rowsAffected;
         } catch (SQLException e) {
-            throw Throwables.propagate(e);
+
+            final SQLException nextException = e.getNextException();
+
+            throw Throwables.propagate(nextException != null ? nextException : e);
         }
 
     }
