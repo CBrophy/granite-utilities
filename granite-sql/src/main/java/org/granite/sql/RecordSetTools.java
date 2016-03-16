@@ -27,10 +27,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 public class RecordSetTools implements Serializable {
 
@@ -51,7 +57,7 @@ public class RecordSetTools implements Serializable {
      * @param <K>                          the key type
      * @return an immutable map of records from the query result set
      */
-    public <K,T> ImmutableMap<K, T> readQueryRecordsAsMap(
+    public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
             final String query,
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
@@ -97,7 +103,7 @@ public class RecordSetTools implements Serializable {
      * @param <K>                          the key type
      * @return an immutable multimap of records from the query result set
      */
-    public <K,T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
+    public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
             final String query,
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
@@ -141,7 +147,7 @@ public class RecordSetTools implements Serializable {
      * @return a list of the deserialized types, ordered by the resultset query order
      */
     public <T> ImmutableList<T> readQueryRecords(final String query,
-                                             final Function<ResultSet, T> createRecordInstanceFunction) {
+                                                 final Function<ResultSet, T> createRecordInstanceFunction) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
 
@@ -180,8 +186,8 @@ public class RecordSetTools implements Serializable {
      * @return the number of rows affected by the write request
      */
     public <T> int writeRecords(final Iterable<T> sourceCollection,
-                            final String parameterizedStatement,
-                            final Function<T, Object[]> serializeToParamArray) {
+                                final String parameterizedStatement,
+                                final Function<T, Object[]> serializeToParamArray) {
         checkNotNull(sourceCollection, "sourceCollection");
         checkNotNull(serializeToParamArray, "serializeToParamArray");
 
@@ -234,6 +240,99 @@ public class RecordSetTools implements Serializable {
             throw Throwables.propagate(nextException != null ? nextException : e);
         }
 
+    }
+
+    /**
+     * Executes a prepared query for each record in the source collection
+     *
+     * @param sourceCollection      The objects to write to the database
+     * @param serializeToParamArray a function that takes an object and converts it into an
+     *                              executable sql query to run
+     * @param batchSize             The row count per batch
+     * @param threadCount           The number of threads to use to write batches
+     * @param timeoutMinutes        The time in minutes to wait for the threads to finish
+     * @return the number of rows affected by the write request
+     */
+    public <T> int writeRecords(final Iterable<T> sourceCollection,
+                                final String parameterizedStatement,
+                                final Function<T, Object[]> serializeToParamArray,
+                                final int batchSize,
+                                final int threadCount,
+                                final int timeoutMinutes) {
+        if (batchSize <= 0) {
+            return writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
+        }
+
+        final ExecutorService batchPool = Executors.newFixedThreadPool(threadCount);
+
+        List<T> currentBatch = new ArrayList<>();
+
+        final List<BatchWriteRunnable> runnables = new ArrayList<>();
+
+        for (T item : sourceCollection) {
+            currentBatch.add(item);
+
+            if (currentBatch.size() >= batchSize) {
+                final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch, parameterizedStatement, serializeToParamArray);
+                batchPool.submit(runnable);
+                runnables.add(runnable);
+                currentBatch = new ArrayList<>();
+            }
+        }
+
+        if (!currentBatch.isEmpty()) {
+            final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch, parameterizedStatement, serializeToParamArray);
+            batchPool.submit(runnable);
+            runnables.add(runnable);
+        }
+
+        batchPool.shutdown();
+
+        try {
+            batchPool.awaitTermination(timeoutMinutes, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            throw Throwables.propagate(e);
+        }
+
+        int rowsAffected = 0;
+        int failureCount = 0;
+        for (BatchWriteRunnable runnable : runnables) {
+            rowsAffected += runnable.rowsAffected;
+
+            if (runnable.exception != null) {
+                LogTools.error("Thread batch writer failed due to exception: {0}", Throwables.getStackTraceAsString(runnable.exception));
+                failureCount++;
+            }
+        }
+
+        checkState(failureCount == 0, "%s thread batch writer(s) failed to write records", failureCount);
+
+        return rowsAffected;
+    }
+
+    private class BatchWriteRunnable<T> implements Runnable {
+        private final Iterable<T> sourceCollection;
+        private final String parameterizedStatement;
+        private final Function<T, Object[]> serializeToParamArray;
+        private int rowsAffected = 0;
+        private Exception exception;
+
+        BatchWriteRunnable(final Iterable<T> sourceCollection,
+                           final String parameterizedStatement,
+                           final Function<T, Object[]> serializeToParamArray) {
+            this.sourceCollection = checkNotNull(sourceCollection, "sourceCollection");
+            this.parameterizedStatement = checkNotNull(parameterizedStatement, "parameterizedStatement");
+            this.serializeToParamArray = checkNotNull(serializeToParamArray, "serializeToParamArray");
+        }
+
+        @Override
+        public void run() {
+            try {
+                rowsAffected = writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
+            } catch (Exception e) {
+                exception = e;
+            }
+        }
     }
 
 }
