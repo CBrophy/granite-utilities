@@ -193,7 +193,11 @@ public class RecordSetTools implements Serializable {
 
         try {
 
-            PreparedStatement statement = connection.prepareStatement(parameterizedStatement);
+            final PreparedStatement statement;
+
+            synchronized (this) {
+                statement = connection.prepareStatement(parameterizedStatement);
+            }
 
             int totalRecordCount = 0;
             int rowsAffected = 0;
