@@ -191,13 +191,7 @@ public class RecordSetTools implements Serializable {
         checkNotNull(sourceCollection, "sourceCollection");
         checkNotNull(serializeToParamArray, "serializeToParamArray");
 
-        try {
-
-            final PreparedStatement statement;
-
-            synchronized (connection) {
-                statement = connection.prepareStatement(parameterizedStatement);
-            }
+        try(final PreparedStatement statement = connection.prepareStatement(parameterizedStatement)) {
 
             int totalRecordCount = 0;
             int rowsAffected = 0;
