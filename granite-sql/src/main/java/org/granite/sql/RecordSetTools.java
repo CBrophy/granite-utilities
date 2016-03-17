@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -263,7 +264,11 @@ public class RecordSetTools implements Serializable {
             return writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
         }
 
-        final ExecutorService batchPool = Executors.newFixedThreadPool(threadCount);
+        final ExecutorService batchPool = Executors.newFixedThreadPool(threadCount, r -> {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
+        });
 
         List<T> currentBatch = new ArrayList<>();
 
@@ -331,8 +336,9 @@ public class RecordSetTools implements Serializable {
                 rowsAffected = writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
             } catch (Exception e) {
                 exception = e;
-                throw Throwables.propagate(e);
+                LogTools.error("Thread writer exception: {0}", Throwables.getStackTraceAsString(e));
             }
+
         }
     }
 
