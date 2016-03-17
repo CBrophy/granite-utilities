@@ -195,7 +195,7 @@ public class RecordSetTools implements Serializable {
 
             final PreparedStatement statement;
 
-            synchronized (this) {
+            synchronized (connection) {
                 statement = connection.prepareStatement(parameterizedStatement);
             }
 
