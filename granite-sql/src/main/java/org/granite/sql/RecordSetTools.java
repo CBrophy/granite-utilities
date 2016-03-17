@@ -331,6 +331,7 @@ public class RecordSetTools implements Serializable {
                 rowsAffected = writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
             } catch (Exception e) {
                 exception = e;
+                throw Throwables.propagate(e);
             }
         }
     }
