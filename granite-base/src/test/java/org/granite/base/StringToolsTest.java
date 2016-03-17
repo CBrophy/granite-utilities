@@ -34,4 +34,13 @@ public class StringToolsTest {
         assertFalse(StringTools.isNullOrEmpty(test3));
         assertFalse(StringTools.isNullOrEmpty(test4));
     }
+
+    @Test
+    public void testTruncate(){
+        final String test1 = "hello";
+
+        assertEquals("h",StringTools.truncate(test1,1));
+        assertEquals("hell",StringTools.truncate(test1,4));
+        assertEquals("hello",StringTools.truncate(test1,900));
+    }
 }

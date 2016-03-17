@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -73,5 +74,12 @@ public final class StringTools implements Serializable {
 
         return ImmutableMap.copyOf(result);
 
+    }
+
+    public static String truncate(final String value, final int maxLength){
+        checkNotNull(value, "value");
+        checkArgument(maxLength > 0, "maxLength must be a positive number");
+
+        return value.length() <= maxLength ? value : value.substring(0, maxLength);
     }
 }
