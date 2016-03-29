@@ -19,17 +19,13 @@ import com.google.common.math.DoubleMath;
 
 import java.io.Serializable;
 import java.math.RoundingMode;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public final class MathTools implements Serializable {
 
-    private MathTools(){}
+    private MathTools() {
+    }
 
     public static double exponentialDecay(final double value, final int time, final double decayCoefficient) {
         return value * Math.exp(time * decayCoefficient);
@@ -60,25 +56,9 @@ public final class MathTools implements Serializable {
         return Math.max(Math.min(value, max), min);
     }
 
-    public static double mean(final Iterable<? extends Number> values){
-        checkNotNull(values, "values");
-
-        double sum = 0.0;
-        int count = 0;
-
-        for (Number value : values) {
-            sum += value.doubleValue();
-            count++;
-        }
-
-        checkState(count > 0, "Cannot find the mean of zero items");
-
-        return sum / (double)count;
-    }
-
     public static boolean isBetween(final double value, final double min, final double max) {
         checkArgument(min < max, "min must be less than max");
-     return min <= value && value <= max;
+        return min <= value && value <= max;
     }
 
     public static boolean isBetween(final int value, final int min, final int max) {

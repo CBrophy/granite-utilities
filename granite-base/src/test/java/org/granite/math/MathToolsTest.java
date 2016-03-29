@@ -48,19 +48,9 @@ public class MathToolsTest {
     }
 
     @Test
-    public void testMean(){
-        double mean1 = MathTools.mean(ImmutableList.of(1, 2));
-        double mean2 = MathTools.mean(ImmutableList.of(5));
-        double mean3 = MathTools.mean(ImmutableList.of(1,2,3));
-
-        assertEquals(1.5, mean1, 0.0);
-        assertEquals(5.0, mean2, 0.0);
-        assertEquals(2.0, mean3, 0.0);
-    }
-
-    @Test
     public void testIsBetween(){
         assertTrue(MathTools.isBetween(0.1,0.0,1.0));
         assertFalse(MathTools.isBetween(0.0,0.1,1.0));
     }
+
 }
