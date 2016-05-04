@@ -28,6 +28,34 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class PercentileTools implements Serializable {
 
+    public static double[] findQuantiles(final List<? extends Number> sortedValues, final double[] quantiles) {
+        checkNotNull(sortedValues, "sortedValues");
+        checkNotNull(quantiles, "quantiles");
+
+        if (sortedValues.isEmpty()) return new double[]{};
+
+        checkArgument(quantiles.length > 0 && sortedValues.size() >= quantiles.length, "quantiles length must be greater than 1 and smaller than the number of elements");
+
+        final double[] result = new double[quantiles.length];
+
+        for (int currentQuantile = 0; currentQuantile < quantiles.length; currentQuantile++) {
+
+            final double index = quantiles[currentQuantile] * (sortedValues.size() + 1);
+
+            final int indexInteger = (int) index;
+
+            if (index - indexInteger == 0.0) { // it's a whole number, so just return the value at the zero-based index
+                result[currentQuantile] = sortedValues.get(indexInteger - 1).doubleValue();
+            } else {
+                result[currentQuantile] = DoubleMath.mean(sortedValues.get(indexInteger - 1).doubleValue(), sortedValues.get(indexInteger).doubleValue());
+
+            }
+
+        }
+
+        return result;
+    }
+
     public static double[] findQuantiles(final List<? extends Number> sortedValues, final int quantileCount) {
         checkNotNull(sortedValues, "sortedValues");
 
@@ -35,7 +63,7 @@ public final class PercentileTools implements Serializable {
 
         checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount, "quantileCount must be greater than 1 and smaller than the number of elements");
 
-        final double[] result = new double[quantileCount - 1];
+        final double[] quantiles = new double[quantileCount - 1];
 
         // 2 quantiles = .5
         // 3 quantiles = .33
@@ -43,22 +71,12 @@ public final class PercentileTools implements Serializable {
         // ...etc
         double phi = 1.0 / (double) quantileCount;
 
-        for (int currentQuantile = 1; currentQuantile < quantileCount; currentQuantile++) {
-
-            final double index = phi * (double) currentQuantile * (sortedValues.size() + 1);
-
-            final int indexInteger = (int) index;
-
-            if (index - indexInteger == 0.0) { // it's a whole number, so just return the value at the zero-based index
-                result[currentQuantile - 1] = sortedValues.get(indexInteger - 1).doubleValue();
-            } else {
-                result[currentQuantile - 1] = DoubleMath.mean(sortedValues.get(indexInteger - 1).doubleValue(), sortedValues.get(indexInteger).doubleValue());
-
-            }
-
+        for (int index = 1; index < quantileCount; index++) {
+            quantiles[index - 1] = phi * (double) index;
         }
 
-        return result;
+        return findQuantiles(sortedValues, quantiles);
+
     }
 
     public static double findPercentile(final double value, final double[] quantiles) {

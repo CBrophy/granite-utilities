@@ -65,9 +65,50 @@ public class PercentileToolsTest {
 
         double[] quartiles2 = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0, 5.0), 4);
 
+        assertEquals(0.5, quartiles2[0], 0.5);
+        assertEquals(1.5, quartiles2[1], 2.5);
+        assertEquals(2.5, quartiles2[2], 4.5);
+
+    }
+
+    @Test
+    public void testFindQuantilesWithPredef() throws Exception {
+
+        double[] medianOdd = PercentileTools.findQuantiles(testList1, new double[]{0.5});
+
+        assertEquals(0.5, medianOdd[0], 0.0);
+
+        double[] medianEven = PercentileTools.findQuantiles(testList2, new double[]{0.5});
+
+        assertEquals(0.55, medianEven[0], 0.0);
+
+        double[] quartilesOdd = PercentileTools.findQuantiles(testList1, new double[]{0.25, 0.5, 0.75});
+
+        assertEquals(0.3, quartilesOdd[0], 0.0);
+        assertEquals(0.5, quartilesOdd[1], 0.0);
+        assertEquals(0.7, quartilesOdd[2], 0.0);
+
+        double[] quartilesEven = PercentileTools.findQuantiles(testList2, new double[]{0.25, 0.5, 0.75});
+
+        assertEquals(0.35, quartilesEven[0], 0.0);
+        assertEquals(0.55, quartilesEven[1], 0.0);
+        assertEquals(0.75, quartilesEven[2], 0.0);
+
+        double[] median = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0), new double[]{0.5});
+
+        assertEquals(0.5, median[0], 0.0);
+
+        double[] quartiles = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0, 2.0, 3.0), new double[]{0.25, 0.5, 0.75});
+
         assertEquals(0.5, quartiles[0], 0.01);
         assertEquals(1.5, quartiles[1], 0.01);
         assertEquals(2.5, quartiles[2], 0.01);
+
+        double[] quartiles2 = PercentileTools.findQuantiles(ImmutableList.of(0.0, 1.0, 2.0, 3.0, 4.0, 5.0), new double[]{0.25, 0.5, 0.75});
+
+        assertEquals(0.5, quartiles2[0], 0.5);
+        assertEquals(1.5, quartiles2[1], 2.5);
+        assertEquals(2.5, quartiles2[2], 4.5);
 
     }
 
