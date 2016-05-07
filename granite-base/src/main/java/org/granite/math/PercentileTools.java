@@ -15,12 +15,13 @@
  */
 package org.granite.math;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Ordering;
 import com.google.common.math.DoubleMath;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -87,9 +88,9 @@ public final class PercentileTools implements Serializable {
 
         double percentile = rank;
 
-        for (int index = 0; index < quantiles.length; index++) {
+        for (double quantile : quantiles) {
 
-            if (value < quantiles[index]) {
+            if (value < quantile) {
                 return percentile;
             }
 
@@ -101,20 +102,20 @@ public final class PercentileTools implements Serializable {
 
     }
 
-    public static <T extends Comparable<T>> ImmutableMap<T, Double> findPercentiles(final Iterable<T> items, final int precision, final boolean complement) {
+    public static <T extends Comparable<T>> ImmutableSortedMap<T, Double> findPercentiles(final Iterable<T> items, final int precision, final boolean complement) {
         checkNotNull(items, "items");
 
         final TreeSet<T> sortedItems = new TreeSet<>(complement ? Ordering.natural().reverse() : Ordering.natural());
 
         items.forEach(sortedItems::add);
 
-        if (sortedItems.isEmpty()) return ImmutableMap.of();
+        if (sortedItems.isEmpty()) return ImmutableSortedMap.of();
 
         final double n = sortedItems.size();
 
         int position = 1;
 
-        final ImmutableMap.Builder<T, Double> result = ImmutableMap.builder();
+        final ImmutableSortedMap.Builder<T, Double> result = ImmutableSortedMap.naturalOrder();
 
         while (!sortedItems.isEmpty()) {
             final T item = sortedItems.pollFirst();
@@ -125,6 +126,16 @@ public final class PercentileTools implements Serializable {
 
         return result.build();
 
+    }
+
+    public static <T extends Comparable<T>> double findPercentileRank(final Iterable<T> items, final T value, final int precision) {
+        final ImmutableSortedMap<T, Double> percentiles = PercentileTools.findPercentiles(items, precision, false);
+
+        final Map.Entry<T, Double> floorEntry = percentiles.floorEntry(value);
+
+        if(floorEntry != null) return floorEntry.getValue();
+
+        return 0.0;
     }
 
 

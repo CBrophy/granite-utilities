@@ -131,7 +131,7 @@ public class PercentileToolsTest {
     }
 
     @Test
-    public void testPercentileRank() throws Exception {
+    public void testPercentiles() throws Exception {
 
         final ImmutableMap<Integer, Double> rankMap = PercentileTools.findPercentiles(percentileRankList, 2, false);
         final ImmutableMap<Integer, Double> rankMapComplement = PercentileTools.findPercentiles(percentileRankList, 2, true);
@@ -150,6 +150,26 @@ public class PercentileToolsTest {
         assertEquals(0.6, rankMapComplement.get(9), 0.0);
         assertEquals(0.4, rankMapComplement.get(45), 0.0);
         assertEquals(0.2, rankMapComplement.get(1000), 0.0);
+
+    }
+
+    @Test
+    public void testPercentileRank(){
+
+
+        assertEquals(0.0, PercentileTools.findPercentileRank(percentileRankList, -1000, 2), 0.0);
+
+        assertEquals(0.2, PercentileTools.findPercentileRank(percentileRankList, -1, 2), 0.0);
+        assertEquals(0.4, PercentileTools.findPercentileRank(percentileRankList, 6, 2), 0.0);
+        assertEquals(0.6, PercentileTools.findPercentileRank(percentileRankList, 9, 2), 0.0);
+        assertEquals(0.8, PercentileTools.findPercentileRank(percentileRankList, 45, 2), 0.0);
+        assertEquals(0.8, PercentileTools.findPercentileRank(percentileRankList, 48, 2), 0.0);
+
+        assertEquals(1.0, PercentileTools.findPercentileRank(percentileRankList, 1000, 2), 0.0);
+
+        assertEquals(1.0, PercentileTools.findPercentileRank(percentileRankList, 100000, 2), 0.0);
+
+
 
     }
 }
