@@ -46,12 +46,12 @@ public final class MathTools implements Serializable {
         return Math.max(Math.min(value, max), min);
     }
 
-    public static double minMaxBound(final int value, final int min, final int max) {
+    public static int minMaxBound(final int value, final int min, final int max) {
         checkArgument(min < max, "min must be less than max");
         return Math.max(Math.min(value, max), min);
     }
 
-    public static double minMaxBound(final long value, final long min, final long max) {
+    public static long minMaxBound(final long value, final long min, final long max) {
         checkArgument(min < max, "min must be less than max");
         return Math.max(Math.min(value, max), min);
     }

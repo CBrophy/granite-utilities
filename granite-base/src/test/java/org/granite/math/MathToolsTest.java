@@ -24,14 +24,14 @@ import static org.junit.Assert.*;
 public class MathToolsTest {
 
     @Test
-    public void testDecay(){
+    public void testDecay() {
         double decayedValue = MathTools.exponentialDecay(1.0, 28, -0.024);
 
         assertEquals(0.5, decayedValue, 0.011);
     }
 
     @Test
-    public void testRounding(){
+    public void testRounding() {
         double r1 = MathTools.round(0.9466726, 2);
 
         assertEquals(0.95, r1, 0.0001);
@@ -42,15 +42,21 @@ public class MathToolsTest {
     }
 
     @Test
-    public void testMinMaxBound(){
-        assertEquals(0.0, MathTools.minMaxBound(-1.0,0.0,1.0),0.0);
-        assertEquals(1.0, MathTools.minMaxBound(2.0,0.0,1.0),0.0);
+    public void testMinMaxBound() {
+        assertEquals(0.0, MathTools.minMaxBound(-1.0, 0.0, 1.0), 0.0);
+        assertEquals(1.0, MathTools.minMaxBound(2.0, 0.0, 1.0), 0.0);
+
+        assertEquals(0L, MathTools.minMaxBound(-1L, 0L, 1L));
+        assertEquals(1L, MathTools.minMaxBound(2L, 0L, 1L));
+
+        assertEquals(0, MathTools.minMaxBound(-1, 0, 1));
+        assertEquals(1, MathTools.minMaxBound(2, 0, 1), 0);
     }
 
     @Test
-    public void testIsBetween(){
-        assertTrue(MathTools.isBetween(0.1,0.0,1.0));
-        assertFalse(MathTools.isBetween(0.0,0.1,1.0));
+    public void testIsBetween() {
+        assertTrue(MathTools.isBetween(0.1, 0.0, 1.0));
+        assertFalse(MathTools.isBetween(0.0, 0.1, 1.0));
     }
 
 }
