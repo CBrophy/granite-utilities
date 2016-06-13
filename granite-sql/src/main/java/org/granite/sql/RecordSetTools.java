@@ -139,6 +139,37 @@ public class RecordSetTools implements Serializable {
     }
 
     /**
+     * Retrieves query results and deserializes the first result as a strong java type
+     *
+     * @param query                        The SQL query to execute
+     * @param createRecordInstanceFunction function to create an object instance from the resultset
+     *                                     record
+     * @return an instance of the deserialized type
+     */
+    public <T> T readQueryRecord(final String query,
+                                 final Function<ResultSet, T> createRecordInstanceFunction) {
+        checkNotNull(query, "query");
+        checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+
+        LogTools.info("Executing query: {0}", query);
+
+        try (final ResultSet resultSet = connection
+                .createStatement()
+                .executeQuery(query)) {
+
+            if (resultSet.next()) {
+                return createRecordInstanceFunction.apply(resultSet);
+            } else {
+                return null;
+            }
+
+        } catch (SQLException e) {
+            throw Throwables.propagate(e);
+        }
+
+    }
+
+    /**
      * Retrieves query results and deserializes them as a strong java type in a simple list
      *
      * @param query                        The SQL query to execute
@@ -191,7 +222,7 @@ public class RecordSetTools implements Serializable {
         checkNotNull(sourceCollection, "sourceCollection");
         checkNotNull(serializeToParamArray, "serializeToParamArray");
 
-        try(final PreparedStatement statement = connection.prepareStatement(parameterizedStatement)) {
+        try (final PreparedStatement statement = connection.prepareStatement(parameterizedStatement)) {
 
             int totalRecordCount = 0;
             int rowsAffected = 0;
