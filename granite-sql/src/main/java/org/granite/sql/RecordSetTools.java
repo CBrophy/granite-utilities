@@ -62,6 +62,27 @@ public class RecordSetTools implements Serializable {
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
     ) {
+        return readQueryRecordsAsMap(query, createRecordInstanceFunction, recordKeyFunction, null);
+    }
+
+    /**
+     * Retrieves query results and deserializes them as a strong java type in a map
+     *
+     * @param query                        The SQL query to execute
+     * @param createRecordInstanceFunction function to create an object instance from the resultset
+     *                                     record
+     * @param recordKeyFunction            function to generate a record key from the java object
+     *                                     instance
+     * @param queryParameters              an array of parameters to apply to the query, if any
+     * @param <K>                          the key type
+     * @return an immutable map of records from the query result set
+     */
+    public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
+            final String query,
+            final Function<ResultSet, T> createRecordInstanceFunction,
+            final Function<T, K> recordKeyFunction,
+            final Object[] queryParameters
+    ) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
         checkNotNull(recordKeyFunction, "recordKeyFunction");
@@ -70,15 +91,25 @@ public class RecordSetTools implements Serializable {
 
         final ImmutableMap.Builder<K, T> builder = ImmutableMap.builder();
 
-        try (final ResultSet resultSet = connection
-                .createStatement()
-                .executeQuery(query)) {
+        try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            while (resultSet.next()) {
-                final T record = createRecordInstanceFunction.apply(resultSet);
-                final K key = recordKeyFunction.apply(record);
+            if (queryParameters != null && queryParameters.length > 0) {
 
-                builder.put(key, record);
+                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+                    // sql params are 1-based :/
+                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+                }
+
+            }
+
+            try (final ResultSet resultSet = statement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    final T record = createRecordInstanceFunction.apply(resultSet);
+                    final K key = recordKeyFunction.apply(record);
+
+                    builder.put(key, record);
+                }
             }
 
         } catch (SQLException e) {
@@ -108,6 +139,27 @@ public class RecordSetTools implements Serializable {
             final Function<ResultSet, T> createRecordInstanceFunction,
             final Function<T, K> recordKeyFunction
     ) {
+        return readQueryRecordsAsMultimap(query, createRecordInstanceFunction, recordKeyFunction, null);
+    }
+
+    /**
+     * Retrieves query results and deserializes them as a strong java type in a multimap
+     *
+     * @param query                        The SQL query to execute
+     * @param createRecordInstanceFunction function to create an object instance from the resultset
+     *                                     record
+     * @param recordKeyFunction            function to generate a record key from the java object
+     *                                     instance
+     * @param queryParameters              an array of parameters to apply to the query, if any
+     * @param <K>                          the key type
+     * @return an immutable multimap of records from the query result set
+     */
+    public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
+            final String query,
+            final Function<ResultSet, T> createRecordInstanceFunction,
+            final Function<T, K> recordKeyFunction,
+            final Object[] queryParameters
+    ) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
         checkNotNull(recordKeyFunction, "recordKeyFunction");
@@ -116,15 +168,26 @@ public class RecordSetTools implements Serializable {
 
         final ImmutableMultimap.Builder<K, T> builder = ImmutableMultimap.builder();
 
-        try (final ResultSet resultSet = connection
-                .createStatement()
-                .executeQuery(query)) {
+        try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            while (resultSet.next()) {
-                final T record = createRecordInstanceFunction.apply(resultSet);
-                final K key = recordKeyFunction.apply(record);
+            if (queryParameters != null && queryParameters.length > 0) {
 
-                builder.put(key, record);
+                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+                    // sql params are 1-based :/
+                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+                }
+
+            }
+
+            try (final ResultSet resultSet = statement.executeQuery()) {
+
+                while (resultSet.next()) {
+                    final T record = createRecordInstanceFunction.apply(resultSet);
+                    final K key = recordKeyFunction.apply(record);
+
+                    builder.put(key, record);
+                }
+
             }
 
         } catch (SQLException e) {
@@ -148,19 +211,45 @@ public class RecordSetTools implements Serializable {
      */
     public <T> T readQueryRecord(final String query,
                                  final Function<ResultSet, T> createRecordInstanceFunction) {
+        return readQueryRecord(query, createRecordInstanceFunction, null);
+    }
+
+    /**
+     * Retrieves query results and deserializes the first result as a strong java type
+     *
+     * @param query                        The SQL query to execute
+     * @param createRecordInstanceFunction function to create an object instance from the resultset
+     *                                     record
+     * @param queryParameters              an array of parameters to apply to the query, if any
+     * @return an instance of the deserialized type
+     */
+    public <T> T readQueryRecord(final String query,
+                                 final Function<ResultSet, T> createRecordInstanceFunction,
+                                 final Object[] queryParameters) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
 
         LogTools.info("Executing query: {0}", query);
 
-        try (final ResultSet resultSet = connection
-                .createStatement()
-                .executeQuery(query)) {
+        try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            if (resultSet.next()) {
-                return createRecordInstanceFunction.apply(resultSet);
-            } else {
-                return null;
+            if (queryParameters != null && queryParameters.length > 0) {
+
+                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+                    // sql params are 1-based :/
+                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+                }
+
+            }
+
+            try (final ResultSet resultSet = statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return createRecordInstanceFunction.apply(resultSet);
+                } else {
+                    return null;
+                }
+
             }
 
         } catch (SQLException e) {
@@ -179,6 +268,21 @@ public class RecordSetTools implements Serializable {
      */
     public <T> ImmutableList<T> readQueryRecords(final String query,
                                                  final Function<ResultSet, T> createRecordInstanceFunction) {
+        return readQueryRecords(query, createRecordInstanceFunction, null);
+    }
+
+    /**
+     * Retrieves query results and deserializes them as a strong java type in a simple list
+     *
+     * @param query                        The SQL query to execute
+     * @param createRecordInstanceFunction function to create an object instance from the resultset
+     *                                     record
+     * @param queryParameters              an array of parameters to apply to the query, if any
+     * @return a list of the deserialized types, ordered by the resultset query order
+     */
+    public <T> ImmutableList<T> readQueryRecords(final String query,
+                                                 final Function<ResultSet, T> createRecordInstanceFunction,
+                                                 final Object[] queryParameters) {
         checkNotNull(query, "query");
         checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
 
@@ -186,15 +290,25 @@ public class RecordSetTools implements Serializable {
 
         final ImmutableList.Builder<T> builder = ImmutableList.builder();
 
-        try (final ResultSet resultSet = connection
-                .createStatement()
-                .executeQuery(query)) {
+        try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            while (resultSet.next()) {
+            if (queryParameters != null && queryParameters.length > 0) {
 
-                final T record = createRecordInstanceFunction.apply(resultSet);
+                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+                    // sql params are 1-based :/
+                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+                }
 
-                builder.add(record);
+            }
+
+            try (final ResultSet resultSet = statement.executeQuery()) {
+
+                while (resultSet.next()) {
+
+                    final T record = createRecordInstanceFunction.apply(resultSet);
+
+                    builder.add(record);
+                }
             }
 
         } catch (SQLException e) {
