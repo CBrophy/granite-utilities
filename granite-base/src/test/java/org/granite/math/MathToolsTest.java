@@ -15,8 +15,6 @@
  */
 package org.granite.math;
 
-import com.google.common.collect.ImmutableList;
-
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -28,6 +26,11 @@ public class MathToolsTest {
         double decayedValue = MathTools.exponentialDecay(1.0, 28, -0.024);
 
         assertEquals(0.5, decayedValue, 0.011);
+
+        double nonDecayedValue = MathTools.exponentialDecay(6.0, 28, 0.0);
+
+        assertEquals(6.0, nonDecayedValue, 0.011);
+
     }
 
     @Test
