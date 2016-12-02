@@ -1,8 +1,11 @@
 package org.granite.configuration;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableMap;
 
 import org.junit.Test;
+
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -13,6 +16,7 @@ public class ApplicationConfigurationTest {
                     , "testDouble", "0.001"
                     , "testLong", "123456789101112"
                     , "testBoolean", "true"
+                    , "testMap", "k1=v1,k2=v2"
             )
     );
 
@@ -70,6 +74,18 @@ public class ApplicationConfigurationTest {
     @Test
     public void testGetString1() throws Exception {
         assertEquals("foo", TEST_CONFIG.getString("blarg", "foo"));
+    }
+
+    @Test
+    public void testGetMap(){
+        Map<String, String> map = TEST_CONFIG.getMap("testMap",
+                                                     CharMatcher.is(','),
+                                                     CharMatcher.is('='),
+                                                     value -> value);
+
+        assertEquals(2, map.size());
+        assertEquals("v1", map.get("k1"));
+        assertEquals("v2", map.get("k2"));
     }
 
 }
