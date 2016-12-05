@@ -16,13 +16,17 @@
 package org.granite.configuration;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
 
 import org.granite.base.StringTools;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -119,6 +123,32 @@ public final class ApplicationConfiguration implements Serializable {
                 );
     }
 
+    public <V> List<V> getList(final String configKey,
+                               final CharMatcher entryDelimiter,
+                               final Function<String, V> valueConverter) {
+        final String configValueString = getString(configKey, "");
+
+        if (StringTools.isNullOrEmpty(configValueString)) return ImmutableList.of();
+
+        return Splitter
+                .on(entryDelimiter)
+                .omitEmptyStrings()
+                .trimResults()
+                .splitToList(configValueString)
+                .stream()
+                .map(valueConverter)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getList(final String configKey,
+                                final CharMatcher entryDelimiter) {
+        return getList(
+                configKey,
+                entryDelimiter,
+                value -> value
+        );
+    }
+
     public boolean isSet(final String configKey) {
         checkNotNull(configKey, "configKey");
 
@@ -133,7 +163,7 @@ public final class ApplicationConfiguration implements Serializable {
         configMap
                 .keySet()
                 .forEach(key -> Logger.getGlobal()
-                        .info(String.format("%s = %s", key, configMap.get(key))));
+                                      .info(String.format("%s = %s", key, configMap.get(key))));
     }
 
 }
