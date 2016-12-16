@@ -34,7 +34,7 @@ public final class ApplicationConfiguration implements Serializable {
 
     private final Map<String, String> configMap;
 
-    ApplicationConfiguration(final Map<String, String> configMap) {
+    public ApplicationConfiguration(final Map<String, String> configMap) {
         this.configMap = checkNotNull(configMap, "configMap");
     }
 

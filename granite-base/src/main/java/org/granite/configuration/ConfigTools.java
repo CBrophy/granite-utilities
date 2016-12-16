@@ -22,6 +22,7 @@ import com.google.common.collect.Sets;
 import com.google.common.io.Files;
 
 import org.granite.base.StringTools;
+import org.granite.collections.MapTools;
 import org.granite.io.FileTools;
 import org.granite.io.ResourceTools;
 import org.granite.log.LogTools;
@@ -32,6 +33,7 @@ import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -41,7 +43,8 @@ public final class ConfigTools implements Serializable {
     private ConfigTools() {
     }
 
-    public static ApplicationConfiguration readConfiguration(final String configFile, final String... resources) {
+    public static ApplicationConfiguration readConfiguration(final String configFile,
+                                                             final String... resources) {
         if (resources == null) return new ApplicationConfiguration(ImmutableMap.of());
 
         final HashMap<String, String> result = new HashMap<>();
@@ -53,14 +56,47 @@ public final class ConfigTools implements Serializable {
         // Read anything from an external config file
         mergeConfigMaps(readConfigFileLines(configFile), result);
 
-        // Check for system properties overrides
+        // Check for system properties/envs for overrides
         // for the known configuration options and apply them
         // as overrides
-        for (String configKey : result.keySet()) {
-            final String overrideValue = System.getProperties().getProperty(configKey, "");
 
-            if (!StringTools.isNullOrEmpty(overrideValue)) {
-                result.put(configKey, overrideValue.trim());
+        final Map<String, String> environmentMatches = MapTools
+                .intersectKeysCaseInsensitive(
+                        result,
+                        System.getenv()
+                );
+
+        for (Map.Entry<String, String> matchEntry : environmentMatches.entrySet()) {
+            final String envOverride = System.getenv().get(matchEntry.getValue());
+
+            if(!StringTools.isNullOrEmpty(envOverride)) {
+                result.put(matchEntry.getKey(), envOverride);
+            }
+        }
+
+        // Ultimately - command-line properties override everything
+
+        final Map<String, Object> propertiesMatches = MapTools
+                .intersectKeys(
+                        result,
+                        System.getProperties(),
+                        String::toLowerCase,
+                        key -> {
+                            if (key instanceof String) {
+                                return ((String) key).toLowerCase();
+                            } else {
+                                // Do not support non-string matching
+                                return UUID.randomUUID().toString();
+                            }
+                        }
+                );
+
+        for (Map.Entry<String, Object> matchEntry : propertiesMatches.entrySet()) {
+            final Object propertiesOverride = System.getProperties().get(matchEntry.getValue());
+
+            if(propertiesOverride instanceof String &&
+                    !StringTools.isNullOrEmpty((String) propertiesOverride)){
+                result.put(matchEntry.getKey(), (String) propertiesOverride);
             }
         }
 
@@ -77,9 +113,9 @@ public final class ConfigTools implements Serializable {
 
             return StringTools.convertStringsToMap(
                     Files.readLines(new File(configFile), Charset.defaultCharset())
-                            .stream()
-                            .filter(line -> !line.trim().startsWith("#")) // remove comments
-                            .collect(Collectors.toList()),
+                         .stream()
+                         .filter(line -> !line.trim().startsWith("#")) // remove comments
+                         .collect(Collectors.toList()),
                     CharMatcher.is('='),
                     false);
 
@@ -88,7 +124,8 @@ public final class ConfigTools implements Serializable {
         }
     }
 
-    private static void mergeConfigMaps(final Map<String, String> source, final HashMap<String, String> destination) {
+    private static void mergeConfigMaps(final Map<String, String> source,
+                                        final HashMap<String, String> destination) {
         checkNotNull(source, "source");
         checkNotNull(destination, "destination");
 
@@ -96,7 +133,8 @@ public final class ConfigTools implements Serializable {
             return;
         }
 
-        final Sets.SetView<String> sharedKeys = Sets.intersection(source.keySet(), destination.keySet());
+        final Sets.SetView<String> sharedKeys = Sets.intersection(source.keySet(),
+                                                                  destination.keySet());
         final Sets.SetView<String> newKeys = Sets.difference(source.keySet(), destination.keySet());
 
         // skip empty values in the source map
