@@ -43,18 +43,19 @@ public final class ConfigTools implements Serializable {
     private ConfigTools() {
     }
 
-    public static ApplicationConfiguration readConfiguration(final String configFile,
-                                                             final String... resources) {
+    public static ApplicationConfiguration readConfiguration(final String... resources) {
         if (resources == null) return new ApplicationConfiguration(ImmutableMap.of());
 
         final HashMap<String, String> result = new HashMap<>();
 
         for (String resource : resources) {
-            mergeConfigMaps(ResourceTools.readResourceTextFileAsMap(resource), result);
+            // Read anything from an external config file or resource
+            if(FileTools.fileExistsAndCanRead(resource)) {
+                mergeConfigMaps(readConfigFileLines(resource), result);
+            } else {
+                mergeConfigMaps(ResourceTools.readResourceTextFileAsMap(resource), result);
+            }
         }
-
-        // Read anything from an external config file
-        mergeConfigMaps(readConfigFileLines(configFile), result);
 
         // Check for system properties/envs for overrides
         // for the known configuration options and apply them
