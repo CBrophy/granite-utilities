@@ -49,6 +49,9 @@ public final class ConfigTools implements Serializable {
         final HashMap<String, String> result = new HashMap<>();
 
         for (String resource : resources) {
+
+            if(StringTools.isNullOrEmpty(resource)) continue;
+
             // Read anything from an external config file or resource
             if(FileTools.fileExistsAndCanRead(resource)) {
                 mergeConfigMaps(readConfigFileLines(resource), result);
