@@ -16,6 +16,7 @@
 package org.granite.base;
 
 import com.google.common.base.CharMatcher;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 
@@ -156,6 +157,32 @@ public final class StringTools implements Serializable {
         checkArgument(maxLength > 0, "maxLength must be a positive number");
 
         return value.length() <= maxLength ? value : value.substring(0, maxLength);
+    }
+
+    public static String cleanSentence(final String... text) {
+        checkNotNull(text, "text");
+
+        if (text.length == 0) {
+            return "";
+        }
+
+        return cleanText(Joiner.on(' ').skipNulls().join(text));
+    }
+
+    public static String cleanText(final String wildText) {
+        checkNotNull(wildText, "wildText");
+
+        if (wildText.isEmpty()) {
+            return "";
+        }
+
+        // Turn everything that is not a lower-case letter or number
+        // into a space and collapse any groups to a single space
+        return CharMatcher
+                .javaLetter()
+                .negate()
+                .collapseFrom(wildText
+                                      .toLowerCase(), ' ').trim();
     }
 
 }
