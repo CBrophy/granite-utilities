@@ -82,4 +82,14 @@ public class MapTools {
 
         return result;
     }
+
+    public static <K,V> void printMap(final Map<K,V> sourceMap){
+        if(sourceMap == null) return;
+
+        sourceMap
+                .entrySet()
+                .stream()
+                .map(entry -> String.valueOf(entry.getKey()) +  " -> " + String.valueOf(entry.getValue()))
+                .forEach(System.out::println);
+    }
 }

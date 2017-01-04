@@ -20,6 +20,8 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 
 import org.granite.base.StringTools;
+import org.granite.collections.MapTools;
+import org.granite.log.LogTools;
 
 import java.io.Serializable;
 import java.util.List;
@@ -36,6 +38,13 @@ public final class ApplicationConfiguration implements Serializable {
 
     public ApplicationConfiguration(final Map<String, String> configMap) {
         this.configMap = checkNotNull(configMap, "configMap");
+
+        if(getBoolean("dumpconfig",false)){
+            LogTools.info("Dumping config map");
+            System.out.println("----BEGIN CONFIG DUMP---");
+            MapTools.printMap(configMap);
+            System.out.println("----END CONFIG DUMP-----");
+        }
     }
 
     public Map<String, String> getConfigMap() {
