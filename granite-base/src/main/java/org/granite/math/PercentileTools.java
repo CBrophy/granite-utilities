@@ -29,13 +29,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class PercentileTools implements Serializable {
 
-    public static double[] findQuantiles(final List<? extends Number> sortedValues, final double[] quantiles) {
+    public static double[] findQuantiles(final List<? extends Number> sortedValues,
+        final double[] quantiles) {
         checkNotNull(sortedValues, "sortedValues");
         checkNotNull(quantiles, "quantiles");
 
-        if (sortedValues.isEmpty()) return new double[]{};
+        if (sortedValues.isEmpty()) {
+            return new double[]{};
+        }
 
-        checkArgument(quantiles.length > 0 && sortedValues.size() >= quantiles.length, "quantiles length must be greater than 1 and smaller than the number of elements");
+        checkArgument(quantiles.length > 0 && sortedValues.size() >= quantiles.length,
+            "quantiles length must be greater than 1 and smaller than the number of elements");
 
         final double[] result = new double[quantiles.length];
 
@@ -45,10 +49,13 @@ public final class PercentileTools implements Serializable {
 
             final int indexInteger = (int) index;
 
-            if (index - indexInteger == 0.0) { // it's a whole number, so just return the value at the zero-based index
+            if (index - indexInteger
+                == 0.0) { // it's a whole number, so just return the value at the zero-based index
                 result[currentQuantile] = sortedValues.get(indexInteger - 1).doubleValue();
             } else {
-                result[currentQuantile] = DoubleMath.mean(sortedValues.get(indexInteger - 1).doubleValue(), sortedValues.get(indexInteger).doubleValue());
+                result[currentQuantile] = DoubleMath
+                    .mean(sortedValues.get(indexInteger - 1).doubleValue(),
+                        sortedValues.get(indexInteger).doubleValue());
 
             }
 
@@ -57,12 +64,16 @@ public final class PercentileTools implements Serializable {
         return result;
     }
 
-    public static double[] findQuantiles(final List<? extends Number> sortedValues, final int quantileCount) {
+    public static double[] findQuantiles(final List<? extends Number> sortedValues,
+        final int quantileCount) {
         checkNotNull(sortedValues, "sortedValues");
 
-        if (sortedValues.isEmpty()) return new double[]{};
+        if (sortedValues.isEmpty()) {
+            return new double[]{};
+        }
 
-        checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount, "quantileCount must be greater than 1 and smaller than the number of elements");
+        checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount,
+            "quantileCount must be greater than 1 and smaller than the number of elements");
 
         final double[] quantiles = new double[quantileCount - 1];
 
@@ -78,6 +89,16 @@ public final class PercentileTools implements Serializable {
 
         return findQuantiles(sortedValues, quantiles);
 
+    }
+
+    public static double median(final List<? extends Number> sortedValues) {
+        final double[] median = findQuantiles(sortedValues, new double[]{0.5});
+
+        return median.length == 1 ? median[0] : Double.NaN;
+    }
+
+    public static double[] quartiles(final List<? extends Number> sortedValues) {
+        return findQuantiles(sortedValues, new double[]{0.25, 0.5, 0.75});
     }
 
     public static double findPercentile(final double value, final double[] quantiles) {
@@ -102,14 +123,18 @@ public final class PercentileTools implements Serializable {
 
     }
 
-    public static <T extends Comparable<T>> ImmutableSortedMap<T, Double> findPercentiles(final Iterable<T> items, final int precision, final boolean complement) {
+    public static <T extends Comparable<T>> ImmutableSortedMap<T, Double> findPercentiles(
+        final Iterable<T> items, final int precision, final boolean complement) {
         checkNotNull(items, "items");
 
-        final TreeSet<T> sortedItems = new TreeSet<>(complement ? Ordering.natural().reverse() : Ordering.natural());
+        final TreeSet<T> sortedItems = new TreeSet<>(
+            complement ? Ordering.natural().reverse() : Ordering.natural());
 
         items.forEach(sortedItems::add);
 
-        if (sortedItems.isEmpty()) return ImmutableSortedMap.of();
+        if (sortedItems.isEmpty()) {
+            return ImmutableSortedMap.of();
+        }
 
         final double n = sortedItems.size();
 
@@ -128,12 +153,16 @@ public final class PercentileTools implements Serializable {
 
     }
 
-    public static <T extends Comparable<T>> double findPercentileRank(final Iterable<T> items, final T value, final int precision) {
-        final ImmutableSortedMap<T, Double> percentiles = PercentileTools.findPercentiles(items, precision, false);
+    public static <T extends Comparable<T>> double findPercentileRank(final Iterable<T> items,
+        final T value, final int precision) {
+        final ImmutableSortedMap<T, Double> percentiles = PercentileTools
+            .findPercentiles(items, precision, false);
 
         final Map.Entry<T, Double> floorEntry = percentiles.floorEntry(value);
 
-        if(floorEntry != null) return floorEntry.getValue();
+        if (floorEntry != null) {
+            return floorEntry.getValue();
+        }
 
         return 0.0;
     }
