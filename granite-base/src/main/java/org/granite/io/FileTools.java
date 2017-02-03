@@ -16,7 +16,23 @@
 
 package org.granite.io;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+import com.google.common.io.Files;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import org.granite.base.ExceptionTools;
 
 public class FileTools {
 
@@ -28,4 +44,57 @@ public class FileTools {
         return file != null && file.exists() && file.isFile() && file.canRead();
     }
 
+    public static BufferedWriter createWriter(final String filePath, final boolean replace){
+        checkNotNull(filePath, "filePath");
+
+        final File destination = new File(filePath);
+
+        try {
+            if(!destination.getParentFile().exists()) {
+                Files.createParentDirs(destination);
+            }
+        } catch (IOException e) {
+            throw ExceptionTools.checkedToRuntime(e);
+        }
+
+        if(destination.exists() && replace){
+            checkState(destination.delete(), "Failed to delete existing file: %s", filePath);
+        }
+
+        try {
+            OutputStream outputStream = new FileOutputStream(destination);
+
+            if(filePath.endsWith(".gz")){
+                outputStream = new GZIPOutputStream(outputStream);
+            }
+
+            return new BufferedWriter(new OutputStreamWriter(outputStream));
+        } catch (IOException e) {
+            throw ExceptionTools.checkedToRuntime(e);
+        }
+    }
+
+    public static BufferedReader createReader(final String filePath){
+        checkNotNull(filePath, "filePath");
+
+        final File source = new File(filePath);
+
+        if(fileExistsAndCanRead(source)){
+
+            try {
+                InputStream inputStream = new FileInputStream(source);
+
+                if(filePath.endsWith(".gz")){
+                    inputStream = new GZIPInputStream(inputStream);
+                }
+
+                return new BufferedReader(new InputStreamReader(inputStream));
+            } catch (IOException e) {
+                throw ExceptionTools.checkedToRuntime(e);
+            }
+
+        } else {
+            return null;
+        }
+    }
 }
