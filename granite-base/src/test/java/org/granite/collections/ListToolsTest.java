@@ -1,5 +1,7 @@
 package org.granite.collections;
 
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -168,6 +170,22 @@ public class ListToolsTest {
 
         assertEquals(1, result3.size());
         assertEquals(20, (int)result3.get(0));
+
+    }
+
+    @Test
+    public void testRandom(){
+        final HashMap<Integer, AtomicInteger> results = new HashMap<>();
+
+        final List<Integer> testList = createTestList();
+
+        for(int count = 0; count < 1000; count++){
+            results
+                .computeIfAbsent(ListTools.random(testList), key-> new AtomicInteger(0))
+                .incrementAndGet();
+        }
+
+        assertEquals( testList.size(), results.size());
 
     }
 }
