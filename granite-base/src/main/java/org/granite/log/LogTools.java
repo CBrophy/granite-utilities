@@ -38,11 +38,11 @@ public final class LogTools {
         System.setProperty("java.util.logging.SimpleFormatter.format", logFormat);
     }
 
-    private static void log(final Level level, final String message, final String... args) {
+    private static void log(final Level level, final String message, final Object... args) {
         LOG.log(level, message, args);
     }
 
-    public static void info(final String message, final String... args) {
+    public static void info(final String message, final Object... args) {
         log(Level.INFO, message, args);
     }
 
@@ -50,13 +50,13 @@ public final class LogTools {
         info(message, "");
     }
 
-    public static void warn(final String message, final String... args) {
+    public static void warn(final String message, final Object... args) {
         log(Level.WARNING, message, args);
     }
 
     public static void warn(final String message) {warn(message, "");}
 
-    public static void error(final String message, final String... args) {
+    public static void error(final String message, final Object... args) {
         log(Level.SEVERE, message, args);
     }
 
