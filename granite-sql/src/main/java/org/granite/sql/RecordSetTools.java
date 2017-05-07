@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 
+import org.granite.base.ExceptionTools;
 import org.granite.log.LogTools;
 
 import java.io.Serializable;
@@ -113,7 +114,7 @@ public class RecordSetTools implements Serializable {
             }
 
         } catch (SQLException e) {
-            throw Throwables.propagate(e);
+            throw ExceptionTools.checkedToRuntime(e);
         }
 
         final ImmutableMap<K, T> result = builder.build();
@@ -191,7 +192,7 @@ public class RecordSetTools implements Serializable {
             }
 
         } catch (SQLException e) {
-            throw Throwables.propagate(e);
+            throw ExceptionTools.checkedToRuntime(e);
         }
 
         final ImmutableMultimap<K, T> result = builder.build();
@@ -253,7 +254,7 @@ public class RecordSetTools implements Serializable {
             }
 
         } catch (SQLException e) {
-            throw Throwables.propagate(e);
+            throw ExceptionTools.checkedToRuntime(e);
         }
 
     }
@@ -312,7 +313,7 @@ public class RecordSetTools implements Serializable {
             }
 
         } catch (SQLException e) {
-            throw Throwables.propagate(e);
+            throw ExceptionTools.checkedToRuntime(e);
         }
 
         final ImmutableList<T> result = builder.build();
@@ -380,7 +381,7 @@ public class RecordSetTools implements Serializable {
 
             final SQLException nextException = e.getNextException();
 
-            throw Throwables.propagate(nextException != null ? nextException : e);
+            throw ExceptionTools.checkedToRuntime(nextException != null ? nextException : e);
         }
 
     }
@@ -438,7 +439,7 @@ public class RecordSetTools implements Serializable {
         try {
             batchPool.awaitTermination(timeoutMinutes, TimeUnit.MINUTES);
         } catch (InterruptedException e) {
-            throw Throwables.propagate(e);
+            throw ExceptionTools.checkedToRuntime(e);
         }
 
         int rowsAffected = 0;
