@@ -21,46 +21,49 @@ import java.util.logging.Logger;
 
 public final class LogTools {
 
-    private LogTools(){}
+  private LogTools() {
+  }
 
-    // log output will look like:
-    // [Tue Dec 16 10:29:07 PST 2014] INFO: <message>
-    public static final String EASY_LOG_FORMAT = "[%1$tc] %4$s: %5$s %n";
+  // log output will look like:
+  // [Tue Dec 16 10:29:07 PST 2014] INFO: <message>
+  public static final String EASY_LOG_FORMAT = "[%1$tc] %4$s: %5$s %n";
 
-    private final static Logger LOG = Logger.getGlobal();
+  private final static Logger LOG = Logger.getGlobal();
 
-    public static void updateLogFormat(){
-        updateLogFormat(EASY_LOG_FORMAT);
-    }
+  public static void updateLogFormat() {
+    updateLogFormat(EASY_LOG_FORMAT);
+  }
 
-    public static void updateLogFormat(final String logFormat){
-        // see doc for java.util.logging.SimpleFormatter
-        System.setProperty("java.util.logging.SimpleFormatter.format", logFormat);
-    }
+  public static void updateLogFormat(final String logFormat) {
+    // see doc for java.util.logging.SimpleFormatter
+    System.setProperty("java.util.logging.SimpleFormatter.format", logFormat);
+  }
 
-    private static void log(final Level level, final String message, final Object... args) {
-        LOG.log(level, message, args);
-    }
+  private static void log(final Level level, final String message, final Object... args) {
+    LOG.log(level, message, args);
+  }
 
-    public static void info(final String message, final Object... args) {
-        log(Level.INFO, message, args);
-    }
+  public static void info(final String message, final Object... args) {
+    log(Level.INFO, message, args);
+  }
 
-    public static void info(final String message) {
-        info(message, "");
-    }
+  public static void info(final String message) {
+    info(message, "");
+  }
 
-    public static void warn(final String message, final Object... args) {
-        log(Level.WARNING, message, args);
-    }
+  public static void warn(final String message, final Object... args) {
+    log(Level.WARNING, message, args);
+  }
 
-    public static void warn(final String message) {warn(message, "");}
+  public static void warn(final String message) {
+    warn(message, "");
+  }
 
-    public static void error(final String message, final Object... args) {
-        log(Level.SEVERE, message, args);
-    }
+  public static void error(final String message, final Object... args) {
+    log(Level.SEVERE, message, args);
+  }
 
-    public static void error(final String message) {
-        error(message, "");
-    }
+  public static void error(final String message) {
+    error(message, "");
+  }
 }

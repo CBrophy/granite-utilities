@@ -15,14 +15,14 @@
  */
 package org.granite.sql;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
-
-import org.granite.base.ExceptionTools;
-import org.granite.log.LogTools;
-
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -34,455 +34,455 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import org.granite.base.ExceptionTools;
+import org.granite.log.LogTools;
 
 public class RecordSetTools implements Serializable {
 
-    private final Connection connection;
+  private final Connection connection;
 
-    public RecordSetTools(final Connection connection) {
-        this.connection = checkNotNull(connection, "connection");
-    }
+  public RecordSetTools(final Connection connection) {
+    this.connection = checkNotNull(connection, "connection");
+  }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a map
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param recordKeyFunction            function to generate a record key from the java object
-     *                                     instance
-     * @param <K>                          the key type
-     * @return an immutable map of records from the query result set
-     */
-    public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
-            final String query,
-            final Function<ResultSet, T> createRecordInstanceFunction,
-            final Function<T, K> recordKeyFunction
-    ) {
-        return readQueryRecordsAsMap(query, createRecordInstanceFunction, recordKeyFunction, null);
-    }
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a map
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param recordKeyFunction function to generate a record key from the java object instance
+   * @param <K> the key type
+   * @return an immutable map of records from the query result set
+   */
+  public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
+      final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Function<T, K> recordKeyFunction
+  ) {
+    return readQueryRecordsAsMap(query, createRecordInstanceFunction, recordKeyFunction, null);
+  }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a map
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param recordKeyFunction            function to generate a record key from the java object
-     *                                     instance
-     * @param queryParameters              an array of parameters to apply to the query, if any
-     * @param <K>                          the key type
-     * @return an immutable map of records from the query result set
-     */
-    public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
-            final String query,
-            final Function<ResultSet, T> createRecordInstanceFunction,
-            final Function<T, K> recordKeyFunction,
-            final Object[] queryParameters
-    ) {
-        checkNotNull(query, "query");
-        checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
-        checkNotNull(recordKeyFunction, "recordKeyFunction");
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a map
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param recordKeyFunction function to generate a record key from the java object instance
+   * @param queryParameters an array of parameters to apply to the query, if any
+   * @param <K> the key type
+   * @return an immutable map of records from the query result set
+   */
+  public <K, T> ImmutableMap<K, T> readQueryRecordsAsMap(
+      final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Function<T, K> recordKeyFunction,
+      final Object[] queryParameters
+  ) {
+    checkNotNull(query, "query");
+    checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+    checkNotNull(recordKeyFunction, "recordKeyFunction");
 
-        LogTools.info("Executing query: {0}", query);
+    LogTools.info("Executing query: {0}", query);
 
-        final ImmutableMap.Builder<K, T> builder = ImmutableMap.builder();
+    final ImmutableMap.Builder<K, T> builder = ImmutableMap.builder();
 
-        try (final PreparedStatement statement = connection.prepareStatement(query)) {
+    try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            if (queryParameters != null && queryParameters.length > 0) {
+      if (queryParameters != null && queryParameters.length > 0) {
 
-                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
-                    // sql params are 1-based :/
-                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
-                }
-
-            }
-
-            try (final ResultSet resultSet = statement.executeQuery()) {
-
-                while (resultSet.next()) {
-                    final T record = createRecordInstanceFunction.apply(resultSet);
-                    final K key = recordKeyFunction.apply(record);
-
-                    builder.put(key, record);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw ExceptionTools.checkedToRuntime(e);
+        for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+          // sql params are 1-based :/
+          statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
         }
 
-        final ImmutableMap<K, T> result = builder.build();
+      }
 
-        LogTools.info("Read {0} records", String.valueOf(result.size()));
+      try (final ResultSet resultSet = statement.executeQuery()) {
 
-        return result;
+        while (resultSet.next()) {
+          final T record = createRecordInstanceFunction.apply(resultSet);
+          final K key = recordKeyFunction.apply(record);
+
+          builder.put(key, record);
+        }
+      }
+
+    } catch (SQLException e) {
+      throw ExceptionTools.checkedToRuntime(e);
     }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a multimap
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param recordKeyFunction            function to generate a record key from the java object
-     *                                     instance
-     * @param <K>                          the key type
-     * @return an immutable multimap of records from the query result set
-     */
-    public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
-            final String query,
-            final Function<ResultSet, T> createRecordInstanceFunction,
-            final Function<T, K> recordKeyFunction
-    ) {
-        return readQueryRecordsAsMultimap(query, createRecordInstanceFunction, recordKeyFunction, null);
+    final ImmutableMap<K, T> result = builder.build();
+
+    LogTools.info("Read {0} records", String.valueOf(result.size()));
+
+    return result;
+  }
+
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a multimap
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param recordKeyFunction function to generate a record key from the java object instance
+   * @param <K> the key type
+   * @return an immutable multimap of records from the query result set
+   */
+  public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
+      final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Function<T, K> recordKeyFunction
+  ) {
+    return readQueryRecordsAsMultimap(query, createRecordInstanceFunction, recordKeyFunction, null);
+  }
+
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a multimap
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param recordKeyFunction function to generate a record key from the java object instance
+   * @param queryParameters an array of parameters to apply to the query, if any
+   * @param <K> the key type
+   * @return an immutable multimap of records from the query result set
+   */
+  public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
+      final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Function<T, K> recordKeyFunction,
+      final Object[] queryParameters
+  ) {
+    checkNotNull(query, "query");
+    checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+    checkNotNull(recordKeyFunction, "recordKeyFunction");
+
+    LogTools.info("Executing query: {0}", query);
+
+    final ImmutableMultimap.Builder<K, T> builder = ImmutableMultimap.builder();
+
+    try (final PreparedStatement statement = connection.prepareStatement(query)) {
+
+      if (queryParameters != null && queryParameters.length > 0) {
+
+        for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+          // sql params are 1-based :/
+          statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+        }
+
+      }
+
+      try (final ResultSet resultSet = statement.executeQuery()) {
+
+        while (resultSet.next()) {
+          final T record = createRecordInstanceFunction.apply(resultSet);
+          final K key = recordKeyFunction.apply(record);
+
+          builder.put(key, record);
+        }
+
+      }
+
+    } catch (SQLException e) {
+      throw ExceptionTools.checkedToRuntime(e);
     }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a multimap
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param recordKeyFunction            function to generate a record key from the java object
-     *                                     instance
-     * @param queryParameters              an array of parameters to apply to the query, if any
-     * @param <K>                          the key type
-     * @return an immutable multimap of records from the query result set
-     */
-    public <K, T> ImmutableMultimap<K, T> readQueryRecordsAsMultimap(
-            final String query,
-            final Function<ResultSet, T> createRecordInstanceFunction,
-            final Function<T, K> recordKeyFunction,
-            final Object[] queryParameters
-    ) {
-        checkNotNull(query, "query");
-        checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
-        checkNotNull(recordKeyFunction, "recordKeyFunction");
+    final ImmutableMultimap<K, T> result = builder.build();
 
-        LogTools.info("Executing query: {0}", query);
+    LogTools.info("Read {0} records", String.valueOf(result.size()));
 
-        final ImmutableMultimap.Builder<K, T> builder = ImmutableMultimap.builder();
+    return result;
+  }
 
-        try (final PreparedStatement statement = connection.prepareStatement(query)) {
+  /**
+   * Retrieves query results and deserializes the first result as a strong java type
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @return an instance of the deserialized type
+   */
+  public <T> T readQueryRecord(final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction) {
+    return readQueryRecord(query, createRecordInstanceFunction, null);
+  }
 
-            if (queryParameters != null && queryParameters.length > 0) {
+  /**
+   * Retrieves query results and deserializes the first result as a strong java type
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param queryParameters an array of parameters to apply to the query, if any
+   * @return an instance of the deserialized type
+   */
+  public <T> T readQueryRecord(final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Object[] queryParameters) {
+    checkNotNull(query, "query");
+    checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
 
-                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
-                    // sql params are 1-based :/
-                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
-                }
+    LogTools.info("Executing query: {0}", query);
 
-            }
+    try (final PreparedStatement statement = connection.prepareStatement(query)) {
 
-            try (final ResultSet resultSet = statement.executeQuery()) {
+      if (queryParameters != null && queryParameters.length > 0) {
 
-                while (resultSet.next()) {
-                    final T record = createRecordInstanceFunction.apply(resultSet);
-                    final K key = recordKeyFunction.apply(record);
-
-                    builder.put(key, record);
-                }
-
-            }
-
-        } catch (SQLException e) {
-            throw ExceptionTools.checkedToRuntime(e);
+        for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+          // sql params are 1-based :/
+          statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
         }
 
-        final ImmutableMultimap<K, T> result = builder.build();
+      }
 
-        LogTools.info("Read {0} records", String.valueOf(result.size()));
+      try (final ResultSet resultSet = statement.executeQuery()) {
 
-        return result;
+        if (resultSet.next()) {
+          return createRecordInstanceFunction.apply(resultSet);
+        } else {
+          return null;
+        }
+
+      }
+
+    } catch (SQLException e) {
+      throw ExceptionTools.checkedToRuntime(e);
     }
 
-    /**
-     * Retrieves query results and deserializes the first result as a strong java type
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @return an instance of the deserialized type
-     */
-    public <T> T readQueryRecord(final String query,
-                                 final Function<ResultSet, T> createRecordInstanceFunction) {
-        return readQueryRecord(query, createRecordInstanceFunction, null);
+  }
+
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a simple list
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @return a list of the deserialized types, ordered by the resultset query order
+   */
+  public <T> ImmutableList<T> readQueryRecords(final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction) {
+    return readQueryRecords(query, createRecordInstanceFunction, null);
+  }
+
+  /**
+   * Retrieves query results and deserializes them as a strong java type in a simple list
+   *
+   * @param query The SQL query to execute
+   * @param createRecordInstanceFunction function to create an object instance from the resultset
+   * record
+   * @param queryParameters an array of parameters to apply to the query, if any
+   * @return a list of the deserialized types, ordered by the resultset query order
+   */
+  public <T> ImmutableList<T> readQueryRecords(final String query,
+      final Function<ResultSet, T> createRecordInstanceFunction,
+      final Object[] queryParameters) {
+    checkNotNull(query, "query");
+    checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+
+    LogTools.info("Executing query: {0}", query);
+
+    final ImmutableList.Builder<T> builder = ImmutableList.builder();
+
+    try (final PreparedStatement statement = connection.prepareStatement(query)) {
+
+      if (queryParameters != null && queryParameters.length > 0) {
+
+        for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
+          // sql params are 1-based :/
+          statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
+        }
+
+      }
+
+      try (final ResultSet resultSet = statement.executeQuery()) {
+
+        while (resultSet.next()) {
+
+          final T record = createRecordInstanceFunction.apply(resultSet);
+
+          builder.add(record);
+        }
+      }
+
+    } catch (SQLException e) {
+      throw ExceptionTools.checkedToRuntime(e);
     }
 
-    /**
-     * Retrieves query results and deserializes the first result as a strong java type
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param queryParameters              an array of parameters to apply to the query, if any
-     * @return an instance of the deserialized type
-     */
-    public <T> T readQueryRecord(final String query,
-                                 final Function<ResultSet, T> createRecordInstanceFunction,
-                                 final Object[] queryParameters) {
-        checkNotNull(query, "query");
-        checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+    final ImmutableList<T> result = builder.build();
 
-        LogTools.info("Executing query: {0}", query);
+    LogTools.info("Read {0} records", String.valueOf(result.size()));
 
-        try (final PreparedStatement statement = connection.prepareStatement(query)) {
+    return result;
+  }
 
-            if (queryParameters != null && queryParameters.length > 0) {
+  /**
+   * Executes a prepared query for each record in the source collection
+   *
+   * @param sourceCollection The objects to write to the database
+   * @param serializeToParamArray a function that takes an object and converts it into an executable
+   * sql query to run
+   * @return the number of rows affected by the write request
+   */
+  public <T> int writeRecords(final Iterable<T> sourceCollection,
+      final String parameterizedStatement,
+      final Function<T, Object[]> serializeToParamArray) {
+    checkNotNull(sourceCollection, "sourceCollection");
+    checkNotNull(serializeToParamArray, "serializeToParamArray");
 
-                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
-                    // sql params are 1-based :/
-                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
-                }
+    try (final PreparedStatement statement = connection.prepareStatement(parameterizedStatement)) {
 
-            }
+      int totalRecordCount = 0;
+      int rowsAffected = 0;
 
-            try (final ResultSet resultSet = statement.executeQuery()) {
+      for (T item : sourceCollection) {
 
-                if (resultSet.next()) {
-                    return createRecordInstanceFunction.apply(resultSet);
-                } else {
-                    return null;
-                }
+        final Object[] params = serializeToParamArray.apply(item);
 
-            }
+        checkNotNull(params, "serializeToParamArray returned null param array");
+        checkArgument(params.length > 0, "serializeToParamArray returned an empty param array");
 
-        } catch (SQLException e) {
-            throw ExceptionTools.checkedToRuntime(e);
+        for (int paramIndex = 0; paramIndex < params.length; paramIndex++) {
+          // sql params are 1-based :/
+          statement.setObject(paramIndex + 1, params[paramIndex]);
         }
 
+        statement.addBatch();
+
+        totalRecordCount++;
+
+      }
+
+      LogTools.info("Executing batch of {0} records", String.valueOf(totalRecordCount));
+
+      final int[] batchResult = statement.executeBatch();
+
+      if (batchResult != null) {
+
+        for (int rows : batchResult) {
+          rowsAffected += rows;
+        }
+
+      }
+
+      // Not every database will report record update counts
+      LogTools
+          .info("{0} records affected during database operation", String.valueOf(totalRecordCount));
+
+      return rowsAffected;
+    } catch (SQLException e) {
+
+      final SQLException nextException = e.getNextException();
+
+      throw ExceptionTools.checkedToRuntime(nextException != null ? nextException : e);
     }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a simple list
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @return a list of the deserialized types, ordered by the resultset query order
-     */
-    public <T> ImmutableList<T> readQueryRecords(final String query,
-                                                 final Function<ResultSet, T> createRecordInstanceFunction) {
-        return readQueryRecords(query, createRecordInstanceFunction, null);
+  }
+
+  /**
+   * Executes a prepared query for each record in the source collection
+   *
+   * @param sourceCollection The objects to write to the database
+   * @param serializeToParamArray a function that takes an object and converts it into an executable
+   * sql query to run
+   * @param batchSize The row count per batch
+   * @param threadCount The number of threads to use to write batches
+   * @param timeoutMinutes The time in minutes to wait for the threads to finish
+   * @return the number of rows affected by the write request
+   */
+  public <T> int writeRecords(final Iterable<T> sourceCollection,
+      final String parameterizedStatement,
+      final Function<T, Object[]> serializeToParamArray,
+      final int batchSize,
+      final int threadCount,
+      final int timeoutMinutes) {
+    if (batchSize <= 0) {
+      return writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
     }
 
-    /**
-     * Retrieves query results and deserializes them as a strong java type in a simple list
-     *
-     * @param query                        The SQL query to execute
-     * @param createRecordInstanceFunction function to create an object instance from the resultset
-     *                                     record
-     * @param queryParameters              an array of parameters to apply to the query, if any
-     * @return a list of the deserialized types, ordered by the resultset query order
-     */
-    public <T> ImmutableList<T> readQueryRecords(final String query,
-                                                 final Function<ResultSet, T> createRecordInstanceFunction,
-                                                 final Object[] queryParameters) {
-        checkNotNull(query, "query");
-        checkNotNull(createRecordInstanceFunction, "createRecordInstanceFunction");
+    final ExecutorService batchPool = Executors.newFixedThreadPool(threadCount, r -> {
+      Thread t = Executors.defaultThreadFactory().newThread(r);
+      t.setDaemon(true);
+      return t;
+    });
 
-        LogTools.info("Executing query: {0}", query);
+    List<T> currentBatch = new ArrayList<>();
 
-        final ImmutableList.Builder<T> builder = ImmutableList.builder();
+    final List<BatchWriteRunnable> runnables = new ArrayList<>();
 
-        try (final PreparedStatement statement = connection.prepareStatement(query)) {
+    for (T item : sourceCollection) {
+      currentBatch.add(item);
 
-            if (queryParameters != null && queryParameters.length > 0) {
-
-                for (int paramIndex = 0; paramIndex < queryParameters.length; paramIndex++) {
-                    // sql params are 1-based :/
-                    statement.setObject(paramIndex + 1, queryParameters[paramIndex]);
-                }
-
-            }
-
-            try (final ResultSet resultSet = statement.executeQuery()) {
-
-                while (resultSet.next()) {
-
-                    final T record = createRecordInstanceFunction.apply(resultSet);
-
-                    builder.add(record);
-                }
-            }
-
-        } catch (SQLException e) {
-            throw ExceptionTools.checkedToRuntime(e);
-        }
-
-        final ImmutableList<T> result = builder.build();
-
-        LogTools.info("Read {0} records", String.valueOf(result.size()));
-
-        return result;
+      if (currentBatch.size() >= batchSize) {
+        final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch,
+            parameterizedStatement, serializeToParamArray);
+        batchPool.submit(runnable);
+        runnables.add(runnable);
+        currentBatch = new ArrayList<>();
+      }
     }
 
-    /**
-     * Executes a prepared query for each record in the source collection
-     *
-     * @param sourceCollection      The objects to write to the database
-     * @param serializeToParamArray a function that takes an object and converts it into an
-     *                              executable sql query to run
-     * @return the number of rows affected by the write request
-     */
-    public <T> int writeRecords(final Iterable<T> sourceCollection,
-                                final String parameterizedStatement,
-                                final Function<T, Object[]> serializeToParamArray) {
-        checkNotNull(sourceCollection, "sourceCollection");
-        checkNotNull(serializeToParamArray, "serializeToParamArray");
-
-        try (final PreparedStatement statement = connection.prepareStatement(parameterizedStatement)) {
-
-            int totalRecordCount = 0;
-            int rowsAffected = 0;
-
-            for (T item : sourceCollection) {
-
-                final Object[] params = serializeToParamArray.apply(item);
-
-                checkNotNull(params, "serializeToParamArray returned null param array");
-                checkArgument(params.length > 0, "serializeToParamArray returned an empty param array");
-
-
-                for (int paramIndex = 0; paramIndex < params.length; paramIndex++) {
-                    // sql params are 1-based :/
-                    statement.setObject(paramIndex + 1, params[paramIndex]);
-                }
-
-                statement.addBatch();
-
-                totalRecordCount++;
-
-            }
-
-            LogTools.info("Executing batch of {0} records", String.valueOf(totalRecordCount));
-
-            final int[] batchResult = statement.executeBatch();
-
-            if (batchResult != null) {
-
-                for (int rows : batchResult) {
-                    rowsAffected += rows;
-                }
-
-            }
-
-            // Not every database will report record update counts
-            LogTools.info("{0} records affected during database operation", String.valueOf(totalRecordCount));
-
-            return rowsAffected;
-        } catch (SQLException e) {
-
-            final SQLException nextException = e.getNextException();
-
-            throw ExceptionTools.checkedToRuntime(nextException != null ? nextException : e);
-        }
-
+    if (!currentBatch.isEmpty()) {
+      final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch,
+          parameterizedStatement, serializeToParamArray);
+      batchPool.submit(runnable);
+      runnables.add(runnable);
     }
 
-    /**
-     * Executes a prepared query for each record in the source collection
-     *
-     * @param sourceCollection      The objects to write to the database
-     * @param serializeToParamArray a function that takes an object and converts it into an
-     *                              executable sql query to run
-     * @param batchSize             The row count per batch
-     * @param threadCount           The number of threads to use to write batches
-     * @param timeoutMinutes        The time in minutes to wait for the threads to finish
-     * @return the number of rows affected by the write request
-     */
-    public <T> int writeRecords(final Iterable<T> sourceCollection,
-                                final String parameterizedStatement,
-                                final Function<T, Object[]> serializeToParamArray,
-                                final int batchSize,
-                                final int threadCount,
-                                final int timeoutMinutes) {
-        if (batchSize <= 0) {
-            return writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
-        }
+    batchPool.shutdown();
 
-        final ExecutorService batchPool = Executors.newFixedThreadPool(threadCount, r -> {
-            Thread t = Executors.defaultThreadFactory().newThread(r);
-            t.setDaemon(true);
-            return t;
-        });
-
-        List<T> currentBatch = new ArrayList<>();
-
-        final List<BatchWriteRunnable> runnables = new ArrayList<>();
-
-        for (T item : sourceCollection) {
-            currentBatch.add(item);
-
-            if (currentBatch.size() >= batchSize) {
-                final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch, parameterizedStatement, serializeToParamArray);
-                batchPool.submit(runnable);
-                runnables.add(runnable);
-                currentBatch = new ArrayList<>();
-            }
-        }
-
-        if (!currentBatch.isEmpty()) {
-            final BatchWriteRunnable<T> runnable = new BatchWriteRunnable<>(currentBatch, parameterizedStatement, serializeToParamArray);
-            batchPool.submit(runnable);
-            runnables.add(runnable);
-        }
-
-        batchPool.shutdown();
-
-        try {
-            batchPool.awaitTermination(timeoutMinutes, TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            throw ExceptionTools.checkedToRuntime(e);
-        }
-
-        int rowsAffected = 0;
-        int failureCount = 0;
-        for (BatchWriteRunnable runnable : runnables) {
-            rowsAffected += runnable.rowsAffected;
-
-            if (runnable.exception != null) {
-                LogTools.error("Thread batch writer failed due to exception: {0}", Throwables.getStackTraceAsString(runnable.exception));
-                failureCount++;
-            }
-        }
-
-        checkState(failureCount == 0, "%s thread batch writer(s) failed to write records", failureCount);
-
-        return rowsAffected;
+    try {
+      batchPool.awaitTermination(timeoutMinutes, TimeUnit.MINUTES);
+    } catch (InterruptedException e) {
+      throw ExceptionTools.checkedToRuntime(e);
     }
 
-    private class BatchWriteRunnable<T> implements Runnable {
-        private final Iterable<T> sourceCollection;
-        private final String parameterizedStatement;
-        private final Function<T, Object[]> serializeToParamArray;
-        private int rowsAffected = 0;
-        private Exception exception;
+    int rowsAffected = 0;
+    int failureCount = 0;
+    for (BatchWriteRunnable runnable : runnables) {
+      rowsAffected += runnable.rowsAffected;
 
-        BatchWriteRunnable(final Iterable<T> sourceCollection,
-                           final String parameterizedStatement,
-                           final Function<T, Object[]> serializeToParamArray) {
-            this.sourceCollection = checkNotNull(sourceCollection, "sourceCollection");
-            this.parameterizedStatement = checkNotNull(parameterizedStatement, "parameterizedStatement");
-            this.serializeToParamArray = checkNotNull(serializeToParamArray, "serializeToParamArray");
-        }
-
-        @Override
-        public void run() {
-            try {
-                rowsAffected = writeRecords(sourceCollection, parameterizedStatement, serializeToParamArray);
-            } catch (Exception e) {
-                exception = e;
-                LogTools.error("Thread writer exception: {0}", Throwables.getStackTraceAsString(e));
-            }
-
-        }
+      if (runnable.exception != null) {
+        LogTools.error("Thread batch writer failed due to exception: {0}",
+            Throwables.getStackTraceAsString(runnable.exception));
+        failureCount++;
+      }
     }
+
+    checkState(failureCount == 0, "%s thread batch writer(s) failed to write records",
+        failureCount);
+
+    return rowsAffected;
+  }
+
+  private class BatchWriteRunnable<T> implements Runnable {
+
+    private final Iterable<T> sourceCollection;
+    private final String parameterizedStatement;
+    private final Function<T, Object[]> serializeToParamArray;
+    private int rowsAffected = 0;
+    private Exception exception;
+
+    BatchWriteRunnable(final Iterable<T> sourceCollection,
+        final String parameterizedStatement,
+        final Function<T, Object[]> serializeToParamArray) {
+      this.sourceCollection = checkNotNull(sourceCollection, "sourceCollection");
+      this.parameterizedStatement = checkNotNull(parameterizedStatement, "parameterizedStatement");
+      this.serializeToParamArray = checkNotNull(serializeToParamArray, "serializeToParamArray");
+    }
+
+    @Override
+    public void run() {
+      try {
+        rowsAffected = writeRecords(sourceCollection, parameterizedStatement,
+            serializeToParamArray);
+      } catch (Exception e) {
+        exception = e;
+        LogTools.error("Thread writer exception: {0}", Throwables.getStackTraceAsString(e));
+      }
+
+    }
+  }
 
 }

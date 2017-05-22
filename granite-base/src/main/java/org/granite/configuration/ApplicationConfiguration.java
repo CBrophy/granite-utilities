@@ -15,164 +15,164 @@
  */
 package org.granite.configuration;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
-
-import org.granite.base.StringTools;
-import org.granite.collections.MapTools;
-import org.granite.log.LogTools;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.granite.base.StringTools;
+import org.granite.collections.MapTools;
+import org.granite.log.LogTools;
 
 public final class ApplicationConfiguration implements Serializable {
 
-    private final Map<String, String> configMap;
+  private final Map<String, String> configMap;
 
-    public ApplicationConfiguration(final Map<String, String> configMap) {
-        this.configMap = checkNotNull(configMap, "configMap");
+  public ApplicationConfiguration(final Map<String, String> configMap) {
+    this.configMap = checkNotNull(configMap, "configMap");
 
-        if(getBoolean("dumpconfig",false)){
-            LogTools.info("Dumping config map");
-            System.out.println("----BEGIN CONFIG DUMP---");
-            MapTools.printMap(configMap);
-            System.out.println("----END CONFIG DUMP-----");
-        }
+    if (getBoolean("dumpconfig", false)) {
+      LogTools.info("Dumping config map");
+      System.out.println("----BEGIN CONFIG DUMP---");
+      MapTools.printMap(configMap);
+      System.out.println("----END CONFIG DUMP-----");
     }
+  }
 
-    public Map<String, String> getConfigMap() {
-        return configMap;
-    }
+  public Map<String, String> getConfigMap() {
+    return configMap;
+  }
 
-    public int getInt(final String configKey) {
-        return Integer.valueOf(getString(configKey));
-    }
+  public int getInt(final String configKey) {
+    return Integer.valueOf(getString(configKey));
+  }
 
-    public int getInt(final String configKey, final int defaultValue) {
-        final String configValueString = getString(configKey, null);
+  public int getInt(final String configKey, final int defaultValue) {
+    final String configValueString = getString(configKey, null);
 
-        return configValueString == null ? defaultValue : Integer.valueOf(configValueString);
-    }
+    return configValueString == null ? defaultValue : Integer.valueOf(configValueString);
+  }
 
-    public long getLong(final String configKey) {
-        return Long.valueOf(getString(configKey));
-    }
+  public long getLong(final String configKey) {
+    return Long.valueOf(getString(configKey));
+  }
 
-    public long getLong(final String configKey, final long defaultValue) {
-        final String configValueString = getString(configKey, null);
+  public long getLong(final String configKey, final long defaultValue) {
+    final String configValueString = getString(configKey, null);
 
-        return configValueString == null ? defaultValue : Long.valueOf(configValueString);
-    }
+    return configValueString == null ? defaultValue : Long.valueOf(configValueString);
+  }
 
-    public double getDouble(final String configKey) {
-        return Double.valueOf(getString(configKey));
-    }
+  public double getDouble(final String configKey) {
+    return Double.valueOf(getString(configKey));
+  }
 
-    public double getDouble(final String configKey, final double defaultValue) {
-        final String configValueString = getString(configKey, null);
+  public double getDouble(final String configKey, final double defaultValue) {
+    final String configValueString = getString(configKey, null);
 
-        return configValueString == null ? defaultValue : Double.valueOf(configValueString);
-    }
+    return configValueString == null ? defaultValue : Double.valueOf(configValueString);
+  }
 
-    public boolean getBoolean(final String configKey) {
-        return Boolean.valueOf(getString(configKey));
-    }
+  public boolean getBoolean(final String configKey) {
+    return Boolean.valueOf(getString(configKey));
+  }
 
-    public boolean getBoolean(final String configKey, final boolean defaultValue) {
-        final String configValueString = getString(configKey, null);
+  public boolean getBoolean(final String configKey, final boolean defaultValue) {
+    final String configValueString = getString(configKey, null);
 
-        return configValueString == null ? defaultValue : Boolean.valueOf(configValueString);
-    }
+    return configValueString == null ? defaultValue : Boolean.valueOf(configValueString);
+  }
 
-    public String getString(final String configKey) {
-        checkNotNull(configKey, "configKey");
+  public String getString(final String configKey) {
+    checkNotNull(configKey, "configKey");
 
-        final String configValueString = configMap.get(configKey);
+    final String configValueString = configMap.get(configKey);
 
-        checkNotNull(configValueString, "Required config key %s not present", configKey);
+    checkNotNull(configValueString, "Required config key %s not present", configKey);
 
-        return configValueString;
-    }
+    return configValueString;
+  }
 
-    public String getString(final String configKey, final String defaultValue) {
-        checkNotNull(configKey, "configKey");
+  public String getString(final String configKey, final String defaultValue) {
+    checkNotNull(configKey, "configKey");
 
-        final String configValueString = configMap.get(configKey);
+    final String configValueString = configMap.get(configKey);
 
-        return configValueString == null ? defaultValue : configValueString;
-    }
+    return configValueString == null ? defaultValue : configValueString;
+  }
 
-    public <V> V getValue(final String configKey,
-                          final V defaultValue,
-                          final Function<String, V> valueConverter) {
-        final String configValueString = configMap.get(configKey);
+  public <V> V getValue(final String configKey,
+      final V defaultValue,
+      final Function<String, V> valueConverter) {
+    final String configValueString = configMap.get(configKey);
 
-        return configValueString == null ? defaultValue : valueConverter.apply(configValueString);
+    return configValueString == null ? defaultValue : valueConverter.apply(configValueString);
 
-    }
+  }
 
-    public <V> Map<String, V> getMap(final String configKey,
-                                     final CharMatcher entryDelimiter,
-                                     final CharMatcher keyValueDelimiter,
-                                     final Function<String, V> valueConverter) {
-        return StringTools
-                .convertStringsToMap(
-                        getString(configKey, ""),
-                        entryDelimiter,
-                        keyValueDelimiter,
-                        valueConverter,
-                        true
-                );
-    }
-
-    public <V> List<V> getList(final String configKey,
-                               final CharMatcher entryDelimiter,
-                               final Function<String, V> valueConverter) {
-        final String configValueString = getString(configKey, "");
-
-        if (StringTools.isNullOrEmpty(configValueString)) return ImmutableList.of();
-
-        return Splitter
-                .on(entryDelimiter)
-                .omitEmptyStrings()
-                .trimResults()
-                .splitToList(configValueString)
-                .stream()
-                .map(valueConverter)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getList(final String configKey,
-                                final CharMatcher entryDelimiter) {
-        return getList(
-                configKey,
-                entryDelimiter,
-                value -> value
+  public <V> Map<String, V> getMap(final String configKey,
+      final CharMatcher entryDelimiter,
+      final CharMatcher keyValueDelimiter,
+      final Function<String, V> valueConverter) {
+    return StringTools
+        .convertStringsToMap(
+            getString(configKey, ""),
+            entryDelimiter,
+            keyValueDelimiter,
+            valueConverter,
+            true
         );
+  }
+
+  public <V> List<V> getList(final String configKey,
+      final CharMatcher entryDelimiter,
+      final Function<String, V> valueConverter) {
+    final String configValueString = getString(configKey, "");
+
+    if (StringTools.isNullOrEmpty(configValueString)) {
+      return ImmutableList.of();
     }
 
-    public boolean isSet(final String configKey) {
-        checkNotNull(configKey, "configKey");
+    return Splitter
+        .on(entryDelimiter)
+        .omitEmptyStrings()
+        .trimResults()
+        .splitToList(configValueString)
+        .stream()
+        .map(valueConverter)
+        .collect(Collectors.toList());
+  }
 
-        return !StringTools.isNullOrEmpty(configMap.get(configKey));
+  public List<String> getList(final String configKey,
+      final CharMatcher entryDelimiter) {
+    return getList(
+        configKey,
+        entryDelimiter,
+        value -> value
+    );
+  }
+
+  public boolean isSet(final String configKey) {
+    checkNotNull(configKey, "configKey");
+
+    return !StringTools.isNullOrEmpty(configMap.get(configKey));
+  }
+
+  public void printConfig() {
+    if (configMap.isEmpty()) {
+      Logger.getGlobal().info("No configuration loaded");
     }
 
-    public void printConfig() {
-        if (configMap.isEmpty()) {
-            Logger.getGlobal().info("No configuration loaded");
-        }
-
-        configMap
-                .keySet()
-                .forEach(key -> Logger.getGlobal()
-                                      .info(String.format("%s = %s", key, configMap.get(key))));
-    }
+    configMap
+        .keySet()
+        .forEach(key -> Logger.getGlobal()
+            .info(String.format("%s = %s", key, configMap.get(key))));
+  }
 
 }

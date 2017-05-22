@@ -15,48 +15,51 @@
  */
 package org.granite.math;
 
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.List;
 
 public class ProbabilityTools {
 
-    /**
-     * Determines the probability union of a list of independent probabilities
-     *
-     * P(A u B u C) = P(A) + P(B) + P(C) - P(AB) - P(AC) - P(BC) + P(ABC)
-     *
-     * @param probabilities Independent probability values to union
-     * @return The corrected union of the probabilities, 0.0 when probabilities is empty, and
-     * probabilities[0] when there is only one value
-     */
-    public static double independentUnion(final List<Double> probabilities) {
-        checkNotNull(probabilities, "probabilities");
+  /**
+   * Determines the probability union of a list of independent probabilities
+   *
+   * P(A u B u C) = P(A) + P(B) + P(C) - P(AB) - P(AC) - P(BC) + P(ABC)
+   *
+   * @param probabilities Independent probability values to union
+   * @return The corrected union of the probabilities, 0.0 when probabilities is empty, and
+   * probabilities[0] when there is only one value
+   */
+  public static double independentUnion(final List<Double> probabilities) {
+    checkNotNull(probabilities, "probabilities");
 
-        if (probabilities.isEmpty()) return 0.0;
-
-        if (probabilities.size() == 1) return probabilities.get(0);
-
-        double result = 0.0;
-        double correction = 0.0;
-        double all = 1.0;
-
-        for (int index = 0; index < probabilities.size(); index++) {
-
-            final double probability = probabilities.get(index);
-
-            result += probability;
-
-            all *= probability;
-
-            for (int nextIndex = index + 1; nextIndex < probabilities.size(); nextIndex++) {
-                final double nextProbability = probabilities.get(nextIndex);
-
-                correction += (probability * nextProbability);
-            }
-        }
-
-
-        return result - correction + all;
+    if (probabilities.isEmpty()) {
+      return 0.0;
     }
+
+    if (probabilities.size() == 1) {
+      return probabilities.get(0);
+    }
+
+    double result = 0.0;
+    double correction = 0.0;
+    double all = 1.0;
+
+    for (int index = 0; index < probabilities.size(); index++) {
+
+      final double probability = probabilities.get(index);
+
+      result += probability;
+
+      all *= probability;
+
+      for (int nextIndex = index + 1; nextIndex < probabilities.size(); nextIndex++) {
+        final double nextProbability = probabilities.get(nextIndex);
+
+        correction += (probability * nextProbability);
+      }
+    }
+
+    return result - correction + all;
+  }
 }

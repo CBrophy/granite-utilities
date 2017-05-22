@@ -16,111 +16,114 @@
 
 package org.granite.collections;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 public class EvictingTreeSet<E> extends TreeSet<E> {
 
-    private final int sizeLimit;
-    private final boolean evictFirst;
+  private final int sizeLimit;
+  private final boolean evictFirst;
 
-    /**
-     * Constructor
-     *
-     * @param sizeLimit  The inclusive limit after which items will be removed
-     * @param evictFirst Set to true to evict the first item or false to evict the last instead
-     */
-    public EvictingTreeSet(final int sizeLimit, final boolean evictFirst) {
+  /**
+   * Constructor
+   *
+   * @param sizeLimit The inclusive limit after which items will be removed
+   * @param evictFirst Set to true to evict the first item or false to evict the last instead
+   */
+  public EvictingTreeSet(final int sizeLimit, final boolean evictFirst) {
 
-        super();
+    super();
 
-        checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
-        this.sizeLimit = sizeLimit;
-        this.evictFirst = evictFirst;
+    checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
+    this.sizeLimit = sizeLimit;
+    this.evictFirst = evictFirst;
+  }
+
+  public EvictingTreeSet(final int sizeLimit, final boolean evictFirst,
+      final Comparator<? super E> comparator) {
+
+    super(comparator);
+
+    checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
+    this.sizeLimit = sizeLimit;
+    this.evictFirst = evictFirst;
+  }
+
+  public EvictingTreeSet(final int sizeLimit, final boolean evictFirst,
+      final Collection<? extends E> c) {
+
+    super(c);
+
+    checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
+    this.sizeLimit = sizeLimit;
+    this.evictFirst = evictFirst;
+    this.evict();
+  }
+
+  public EvictingTreeSet(final int sizeLimit, final boolean evictFirst, final SortedSet<E> s) {
+    super(s);
+
+    checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
+    this.sizeLimit = sizeLimit;
+    this.evictFirst = evictFirst;
+    this.evict();
+  }
+
+  @Override
+  public boolean add(E e) {
+
+    boolean result = super.add(e);
+    this.evict();
+    return result;
+
+
+  }
+
+  @Override
+  public boolean addAll(Collection<? extends E> c) {
+    boolean result = super.addAll(c);
+    this.evict();
+    return result;
+
+  }
+
+  @SuppressWarnings("CloneDoesntCallSuperClone")
+  @Override
+  public Object clone() {
+    final EvictingTreeSet<E> clone = new EvictingTreeSet<>(this.sizeLimit, this.evictFirst,
+        comparator());
+
+    clone.addAll(this);
+
+    return clone;
+
+  }
+
+  /**
+   * The size limit (inclusive) after which items will be evicted from the set
+   *
+   * @return The size limit
+   */
+  public int getSizeLimit() {
+    return sizeLimit;
+  }
+
+  /**
+   * Whether or not to evict items from the first or last part of the sort
+   *
+   * @return True if items are evicted from the first part, false to evict the last
+   */
+  public boolean isEvictFirst() {
+    return evictFirst;
+  }
+
+  private void evict() {
+    while (size() > sizeLimit) {
+      remove(evictFirst ? first() : last());
     }
-
-    public EvictingTreeSet(final int sizeLimit, final boolean evictFirst, final Comparator<? super E> comparator) {
-
-        super(comparator);
-
-        checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
-        this.sizeLimit = sizeLimit;
-        this.evictFirst = evictFirst;
-    }
-
-    public EvictingTreeSet(final int sizeLimit, final boolean evictFirst, final Collection<? extends E> c) {
-
-        super(c);
-
-        checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
-        this.sizeLimit = sizeLimit;
-        this.evictFirst = evictFirst;
-        this.evict();
-    }
-
-    public EvictingTreeSet(final int sizeLimit, final boolean evictFirst, final SortedSet<E> s) {
-        super(s);
-
-        checkArgument(sizeLimit > 0, "sizeLimit must be a positive integer");
-        this.sizeLimit = sizeLimit;
-        this.evictFirst = evictFirst;
-        this.evict();
-    }
-
-    @Override
-    public boolean add(E e) {
-
-        boolean result = super.add(e);
-        this.evict();
-        return result;
-
-
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        boolean result = super.addAll(c);
-        this.evict();
-        return result;
-
-    }
-
-    @SuppressWarnings("CloneDoesntCallSuperClone")
-    @Override
-    public Object clone() {
-        final EvictingTreeSet<E> clone = new EvictingTreeSet<>(this.sizeLimit, this.evictFirst, comparator());
-
-        clone.addAll(this);
-
-        return clone;
-
-    }
-
-    /**
-     * The size limit (inclusive) after which items will be evicted from the set
-     *
-     * @return The size limit
-     */
-    public int getSizeLimit() {
-        return sizeLimit;
-    }
-
-    /**
-     * Whether or not to evict items from the first or last part of the sort
-     *
-     * @return True if items are evicted from the first part, false to evict the last
-     */
-    public boolean isEvictFirst() {
-        return evictFirst;
-    }
-
-    private void evict() {
-        while (size() > sizeLimit) {
-            remove(evictFirst ? first() : last());
-        }
-    }
+  }
 }

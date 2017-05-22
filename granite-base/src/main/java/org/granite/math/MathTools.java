@@ -15,59 +15,60 @@
  */
 package org.granite.math;
 
-import com.google.common.math.DoubleMath;
+import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.math.DoubleMath;
 import java.io.Serializable;
 import java.math.RoundingMode;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 public final class MathTools implements Serializable {
 
-    private MathTools() {
-    }
+  private MathTools() {
+  }
 
-    public static double exponentialDecay(final double value, final int time, final double decayCoefficient) {
-        return value * Math.exp(time * decayCoefficient);
-    }
+  public static double exponentialDecay(final double value, final int time,
+      final double decayCoefficient) {
+    return value * Math.exp(time * decayCoefficient);
+  }
 
-    public static double exponentialDecay(final double value, final long time, final double decayCoefficient) {
-        return value * Math.exp(time * decayCoefficient);
-    }
+  public static double exponentialDecay(final double value, final long time,
+      final double decayCoefficient) {
+    return value * Math.exp(time * decayCoefficient);
+  }
 
-    public static double round(final double value, final int precision) {
-        final double coefficient = Math.pow(10.0, precision);
+  public static double round(final double value, final int precision) {
+    final double coefficient = Math.pow(10.0, precision);
 
-        return DoubleMath.roundToLong(value * coefficient, RoundingMode.HALF_UP) / coefficient;
-    }
+    return DoubleMath.roundToLong(value * coefficient, RoundingMode.HALF_UP) / coefficient;
+  }
 
-    public static double minMaxBound(final double value, final double min, final double max) {
-        checkArgument(min < max, "min must be less than max");
-        return Math.max(Math.min(value, max), min);
-    }
+  public static double minMaxBound(final double value, final double min, final double max) {
+    checkArgument(min < max, "min must be less than max");
+    return Math.max(Math.min(value, max), min);
+  }
 
-    public static int minMaxBound(final int value, final int min, final int max) {
-        checkArgument(min < max, "min must be less than max");
-        return Math.max(Math.min(value, max), min);
-    }
+  public static int minMaxBound(final int value, final int min, final int max) {
+    checkArgument(min < max, "min must be less than max");
+    return Math.max(Math.min(value, max), min);
+  }
 
-    public static long minMaxBound(final long value, final long min, final long max) {
-        checkArgument(min < max, "min must be less than max");
-        return Math.max(Math.min(value, max), min);
-    }
+  public static long minMaxBound(final long value, final long min, final long max) {
+    checkArgument(min < max, "min must be less than max");
+    return Math.max(Math.min(value, max), min);
+  }
 
-    public static boolean isBetween(final double value, final double min, final double max) {
-        checkArgument(min < max, "min must be less than max");
-        return min <= value && value <= max;
-    }
+  public static boolean isBetween(final double value, final double min, final double max) {
+    checkArgument(min < max, "min must be less than max");
+    return min <= value && value <= max;
+  }
 
-    public static boolean isBetween(final int value, final int min, final int max) {
-        checkArgument(min < max, "min must be less than max");
-        return min <= value && value <= max;
-    }
+  public static boolean isBetween(final int value, final int min, final int max) {
+    checkArgument(min < max, "min must be less than max");
+    return min <= value && value <= max;
+  }
 
-    public static boolean isBetween(final long value, final long min, final long max) {
-        checkArgument(min < max, "min must be less than max");
-        return min <= value && value <= max;
-    }
+  public static boolean isBetween(final long value, final long min, final long max) {
+    checkArgument(min < max, "min must be less than max");
+    return min <= value && value <= max;
+  }
 }

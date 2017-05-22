@@ -15,17 +15,17 @@
  */
 package org.granite.process;
 
-import org.junit.Test;
+import static org.junit.Assert.assertNotNull;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class ProcessToolsTest {
 
-    @Test
-    public void testGetCommandOutput() throws Exception {
+  @Test
+  public void testGetCommandOutput() throws Exception {
 
-        final String output = ProcessTools.getCommandOutput("ls", "-la");
+    final String output = ProcessTools.getCommandOutput("ls", "-la");
 
-        assertNotNull(output);
-    }
+    assertNotNull(output);
+  }
 }

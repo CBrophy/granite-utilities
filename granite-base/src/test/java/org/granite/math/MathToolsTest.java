@@ -15,51 +15,53 @@
  */
 package org.granite.math;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class MathToolsTest {
 
-    @Test
-    public void testDecay() {
-        double decayedValue = MathTools.exponentialDecay(1.0, 28, -0.024);
+  @Test
+  public void testDecay() {
+    double decayedValue = MathTools.exponentialDecay(1.0, 28, -0.024);
 
-        assertEquals(0.5, decayedValue, 0.011);
+    assertEquals(0.5, decayedValue, 0.011);
 
-        double nonDecayedValue = MathTools.exponentialDecay(6.0, 28, 0.0);
+    double nonDecayedValue = MathTools.exponentialDecay(6.0, 28, 0.0);
 
-        assertEquals(6.0, nonDecayedValue, 0.011);
+    assertEquals(6.0, nonDecayedValue, 0.011);
 
-    }
+  }
 
-    @Test
-    public void testRounding() {
-        double r1 = MathTools.round(0.9466726, 2);
+  @Test
+  public void testRounding() {
+    double r1 = MathTools.round(0.9466726, 2);
 
-        assertEquals(0.95, r1, 0.0001);
+    assertEquals(0.95, r1, 0.0001);
 
-        double r2 = MathTools.round(0.9436726, 2);
+    double r2 = MathTools.round(0.9436726, 2);
 
-        assertEquals(0.94, r2, 0.0001);
-    }
+    assertEquals(0.94, r2, 0.0001);
+  }
 
-    @Test
-    public void testMinMaxBound() {
-        assertEquals(0.0, MathTools.minMaxBound(-1.0, 0.0, 1.0), 0.0);
-        assertEquals(1.0, MathTools.minMaxBound(2.0, 0.0, 1.0), 0.0);
+  @Test
+  public void testMinMaxBound() {
+    assertEquals(0.0, MathTools.minMaxBound(-1.0, 0.0, 1.0), 0.0);
+    assertEquals(1.0, MathTools.minMaxBound(2.0, 0.0, 1.0), 0.0);
 
-        assertEquals(0L, MathTools.minMaxBound(-1L, 0L, 1L));
-        assertEquals(1L, MathTools.minMaxBound(2L, 0L, 1L));
+    assertEquals(0L, MathTools.minMaxBound(-1L, 0L, 1L));
+    assertEquals(1L, MathTools.minMaxBound(2L, 0L, 1L));
 
-        assertEquals(0, MathTools.minMaxBound(-1, 0, 1));
-        assertEquals(1, MathTools.minMaxBound(2, 0, 1), 0);
-    }
+    assertEquals(0, MathTools.minMaxBound(-1, 0, 1));
+    assertEquals(1, MathTools.minMaxBound(2, 0, 1), 0);
+  }
 
-    @Test
-    public void testIsBetween() {
-        assertTrue(MathTools.isBetween(0.1, 0.0, 1.0));
-        assertFalse(MathTools.isBetween(0.0, 0.1, 1.0));
-    }
+  @Test
+  public void testIsBetween() {
+    assertTrue(MathTools.isBetween(0.1, 0.0, 1.0));
+    assertFalse(MathTools.isBetween(0.0, 0.1, 1.0));
+  }
 
 }

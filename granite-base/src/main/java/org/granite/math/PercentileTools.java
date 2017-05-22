@@ -15,157 +15,156 @@
  */
 package org.granite.math;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Ordering;
 import com.google.common.math.DoubleMath;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public final class PercentileTools implements Serializable {
 
-    public static double[] findQuantiles(final List<? extends Number> sortedValues,
-        final double[] quantiles) {
-        checkNotNull(sortedValues, "sortedValues");
-        checkNotNull(quantiles, "quantiles");
+  public static double[] findQuantiles(final List<? extends Number> sortedValues,
+      final double[] quantiles) {
+    checkNotNull(sortedValues, "sortedValues");
+    checkNotNull(quantiles, "quantiles");
 
-        if (sortedValues.isEmpty()) {
-            return new double[]{};
-        }
-
-        checkArgument(quantiles.length > 0 && sortedValues.size() >= quantiles.length,
-            "quantiles length must be greater than 1 and smaller than the number of elements");
-
-        final double[] result = new double[quantiles.length];
-
-        for (int currentQuantile = 0; currentQuantile < quantiles.length; currentQuantile++) {
-
-            final double index = quantiles[currentQuantile] * (sortedValues.size() + 1);
-
-            final int indexInteger = (int) index;
-
-            if (index - indexInteger
-                == 0.0) { // it's a whole number, so just return the value at the zero-based index
-                result[currentQuantile] = sortedValues.get(indexInteger - 1).doubleValue();
-            } else {
-                result[currentQuantile] = DoubleMath
-                    .mean(sortedValues.get(indexInteger - 1).doubleValue(),
-                        sortedValues.get(indexInteger).doubleValue());
-
-            }
-
-        }
-
-        return result;
+    if (sortedValues.isEmpty()) {
+      return new double[]{};
     }
 
-    public static double[] findQuantiles(final List<? extends Number> sortedValues,
-        final int quantileCount) {
-        checkNotNull(sortedValues, "sortedValues");
+    checkArgument(quantiles.length > 0 && sortedValues.size() >= quantiles.length,
+        "quantiles length must be greater than 1 and smaller than the number of elements");
 
-        if (sortedValues.isEmpty()) {
-            return new double[]{};
-        }
+    final double[] result = new double[quantiles.length];
 
-        checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount,
-            "quantileCount must be greater than 1 and smaller than the number of elements");
+    for (int currentQuantile = 0; currentQuantile < quantiles.length; currentQuantile++) {
 
-        final double[] quantiles = new double[quantileCount - 1];
+      final double index = quantiles[currentQuantile] * (sortedValues.size() + 1);
 
-        // 2 quantiles = .5
-        // 3 quantiles = .33
-        // 4 quantiles = .25
-        // ...etc
-        double phi = 1.0 / (double) quantileCount;
+      final int indexInteger = (int) index;
 
-        for (int index = 1; index < quantileCount; index++) {
-            quantiles[index - 1] = phi * (double) index;
-        }
+      if (index - indexInteger
+          == 0.0) { // it's a whole number, so just return the value at the zero-based index
+        result[currentQuantile] = sortedValues.get(indexInteger - 1).doubleValue();
+      } else {
+        result[currentQuantile] = DoubleMath
+            .mean(sortedValues.get(indexInteger - 1).doubleValue(),
+                sortedValues.get(indexInteger).doubleValue());
 
-        return findQuantiles(sortedValues, quantiles);
+      }
 
     }
 
-    public static double median(final List<? extends Number> sortedValues) {
-        final double[] median = findQuantiles(sortedValues, new double[]{0.5});
+    return result;
+  }
 
-        return median.length == 1 ? median[0] : Double.NaN;
+  public static double[] findQuantiles(final List<? extends Number> sortedValues,
+      final int quantileCount) {
+    checkNotNull(sortedValues, "sortedValues");
+
+    if (sortedValues.isEmpty()) {
+      return new double[]{};
     }
 
-    public static double[] quartiles(final List<? extends Number> sortedValues) {
-        return findQuantiles(sortedValues, new double[]{0.25, 0.5, 0.75});
+    checkArgument(quantileCount > 1 && sortedValues.size() >= quantileCount,
+        "quantileCount must be greater than 1 and smaller than the number of elements");
+
+    final double[] quantiles = new double[quantileCount - 1];
+
+    // 2 quantiles = .5
+    // 3 quantiles = .33
+    // 4 quantiles = .25
+    // ...etc
+    double phi = 1.0 / (double) quantileCount;
+
+    for (int index = 1; index < quantileCount; index++) {
+      quantiles[index - 1] = phi * (double) index;
     }
 
-    public static double findPercentile(final double value, final double[] quantiles) {
-        checkNotNull(quantiles, "quantiles");
-        checkArgument(quantiles.length > 0, "quantiles must contain at least one value");
+    return findQuantiles(sortedValues, quantiles);
 
-        final double rank = 1.0 / (quantiles.length + 1.0);
+  }
 
-        double percentile = rank;
+  public static double median(final List<? extends Number> sortedValues) {
+    final double[] median = findQuantiles(sortedValues, new double[]{0.5});
 
-        for (double quantile : quantiles) {
+    return median.length == 1 ? median[0] : Double.NaN;
+  }
 
-            if (value < quantile) {
-                return percentile;
-            }
+  public static double[] quartiles(final List<? extends Number> sortedValues) {
+    return findQuantiles(sortedValues, new double[]{0.25, 0.5, 0.75});
+  }
 
-            percentile += rank;
+  public static double findPercentile(final double value, final double[] quantiles) {
+    checkNotNull(quantiles, "quantiles");
+    checkArgument(quantiles.length > 0, "quantiles must contain at least one value");
 
-        }
+    final double rank = 1.0 / (quantiles.length + 1.0);
 
+    double percentile = rank;
+
+    for (double quantile : quantiles) {
+
+      if (value < quantile) {
         return percentile;
+      }
+
+      percentile += rank;
 
     }
 
-    public static <T extends Comparable<T>> ImmutableSortedMap<T, Double> findPercentiles(
-        final Iterable<T> items, final int precision, final boolean complement) {
-        checkNotNull(items, "items");
+    return percentile;
 
-        final TreeSet<T> sortedItems = new TreeSet<>(
-            complement ? Ordering.natural().reverse() : Ordering.natural());
+  }
 
-        items.forEach(sortedItems::add);
+  public static <T extends Comparable<T>> ImmutableSortedMap<T, Double> findPercentiles(
+      final Iterable<T> items, final int precision, final boolean complement) {
+    checkNotNull(items, "items");
 
-        if (sortedItems.isEmpty()) {
-            return ImmutableSortedMap.of();
-        }
+    final TreeSet<T> sortedItems = new TreeSet<>(
+        complement ? Ordering.natural().reverse() : Ordering.natural());
 
-        final double n = sortedItems.size();
+    items.forEach(sortedItems::add);
 
-        int position = 1;
-
-        final ImmutableSortedMap.Builder<T, Double> result = ImmutableSortedMap.naturalOrder();
-
-        while (!sortedItems.isEmpty()) {
-            final T item = sortedItems.pollFirst();
-            final double percentile = MathTools.round((double) position / n, precision);
-            result.put(item, percentile);
-            position++;
-        }
-
-        return result.build();
-
+    if (sortedItems.isEmpty()) {
+      return ImmutableSortedMap.of();
     }
 
-    public static <T extends Comparable<T>> double findPercentileRank(final Iterable<T> items,
-        final T value, final int precision) {
-        final ImmutableSortedMap<T, Double> percentiles = PercentileTools
-            .findPercentiles(items, precision, false);
+    final double n = sortedItems.size();
 
-        final Map.Entry<T, Double> floorEntry = percentiles.floorEntry(value);
+    int position = 1;
 
-        if (floorEntry != null) {
-            return floorEntry.getValue();
-        }
+    final ImmutableSortedMap.Builder<T, Double> result = ImmutableSortedMap.naturalOrder();
 
-        return 0.0;
+    while (!sortedItems.isEmpty()) {
+      final T item = sortedItems.pollFirst();
+      final double percentile = MathTools.round((double) position / n, precision);
+      result.put(item, percentile);
+      position++;
     }
+
+    return result.build();
+
+  }
+
+  public static <T extends Comparable<T>> double findPercentileRank(final Iterable<T> items,
+      final T value, final int precision) {
+    final ImmutableSortedMap<T, Double> percentiles = PercentileTools
+        .findPercentiles(items, precision, false);
+
+    final Map.Entry<T, Double> floorEntry = percentiles.floorEntry(value);
+
+    if (floorEntry != null) {
+      return floorEntry.getValue();
+    }
+
+    return 0.0;
+  }
 
 
 }

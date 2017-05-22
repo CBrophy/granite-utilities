@@ -16,37 +16,38 @@
 
 package org.granite.io;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class ResourceToolsTest {
 
-    @Test
-    public void testReadResourceTextFile() throws Exception {
+  @Test
+  public void testReadResourceTextFile() throws Exception {
 
-        final List<String> resource1Values = ResourceTools.readResourceTextFile("test-resource.txt");
-        final List<String> resource2Values = ResourceTools.readResourceTextFile("test-resource2.txt.gz");
+    final List<String> resource1Values = ResourceTools.readResourceTextFile("test-resource.txt");
+    final List<String> resource2Values = ResourceTools
+        .readResourceTextFile("test-resource2.txt.gz");
 
-        assertNotNull(resource1Values);
-        assertNotNull(resource2Values);
+    assertNotNull(resource1Values);
+    assertNotNull(resource2Values);
 
-        assertEquals(5, resource1Values.size());
-        assertEquals(5, resource2Values.size());
+    assertEquals(5, resource1Values.size());
+    assertEquals(5, resource2Values.size());
 
-        assertEquals("This", resource1Values.get(0));
-        assertEquals("is", resource1Values.get(1));
-        assertEquals("a", resource1Values.get(2));
-        assertEquals("test", resource1Values.get(3));
-        assertEquals("!", resource1Values.get(4));
+    assertEquals("This", resource1Values.get(0));
+    assertEquals("is", resource1Values.get(1));
+    assertEquals("a", resource1Values.get(2));
+    assertEquals("test", resource1Values.get(3));
+    assertEquals("!", resource1Values.get(4));
 
-        assertEquals("This", resource2Values.get(0));
-        assertEquals("is", resource2Values.get(1));
-        assertEquals("a", resource2Values.get(2));
-        assertEquals("test", resource2Values.get(3));
-        assertEquals("!", resource2Values.get(4));
+    assertEquals("This", resource2Values.get(0));
+    assertEquals("is", resource2Values.get(1));
+    assertEquals("a", resource2Values.get(2));
+    assertEquals("test", resource2Values.get(3));
+    assertEquals("!", resource2Values.get(4));
 
-    }
+  }
 }

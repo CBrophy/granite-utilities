@@ -20,13 +20,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ExceptionTools {
 
-    public static RuntimeException checkedToRuntime(final Exception throwable){
-        checkNotNull(throwable, "throwable");
+  public static RuntimeException checkedToRuntime(final Exception throwable) {
+    checkNotNull(throwable, "throwable");
 
-        if(throwable instanceof RuntimeException){
-            return (RuntimeException) throwable;
-        }
-
-        return new RuntimeException(throwable);
+    if (throwable instanceof RuntimeException) {
+      return (RuntimeException) throwable;
     }
+
+    return new RuntimeException(throwable);
+  }
 }

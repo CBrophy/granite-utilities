@@ -15,9 +15,10 @@
  */
 package org.granite.io;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.io.CharStreams;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,47 +27,46 @@ import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class GzipTools {
-    public static byte[] compressText(final String plainText) {
-        return compressText(plainText, Charset.defaultCharset());
+
+  public static byte[] compressText(final String plainText) {
+    return compressText(plainText, Charset.defaultCharset());
+  }
+
+  public static byte[] compressText(final String plainText, final Charset charset) {
+    checkNotNull(plainText, "plainText");
+    checkNotNull(charset, "charset");
+
+    try {
+
+      final ByteArrayOutputStream memoryStream = new ByteArrayOutputStream();
+
+      final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(memoryStream);
+
+      gzipOutputStream.write(plainText.getBytes(charset));
+
+      memoryStream.close();
+
+      gzipOutputStream.close();
+
+      return memoryStream.toByteArray();
+
+    } catch (IOException e) {
+      throw Throwables.propagate(e);
     }
+  }
 
-    public static byte[] compressText(final String plainText, final Charset charset) {
-        checkNotNull(plainText, "plainText");
-        checkNotNull(charset, "charset");
+  public static String uncompressText(final byte[] compressedText) {
+    checkNotNull(compressedText, "compressedText");
 
-        try {
+    try (final InputStreamReader reader = new InputStreamReader(
+        new GZIPInputStream(new ByteArrayInputStream(compressedText)))) {
 
-            final ByteArrayOutputStream memoryStream = new ByteArrayOutputStream();
+      return CharStreams.toString(reader);
 
-            final GZIPOutputStream gzipOutputStream = new GZIPOutputStream(memoryStream);
-
-            gzipOutputStream.write(plainText.getBytes(charset));
-
-            memoryStream.close();
-
-            gzipOutputStream.close();
-
-            return memoryStream.toByteArray();
-
-        } catch (IOException e) {
-            throw Throwables.propagate(e);
-        }
+    } catch (IOException e) {
+      throw Throwables.propagate(e);
     }
-
-    public static String uncompressText(final byte[] compressedText) {
-        checkNotNull(compressedText, "compressedText");
-
-        try (final InputStreamReader reader = new InputStreamReader(
-                new GZIPInputStream(new ByteArrayInputStream(compressedText)))) {
-
-            return CharStreams.toString(reader);
-
-        } catch (IOException e) {
-            throw Throwables.propagate(e);
-        }
-    }
+  }
 
 }
