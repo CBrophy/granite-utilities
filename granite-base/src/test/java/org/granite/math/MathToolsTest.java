@@ -64,4 +64,14 @@ public class MathToolsTest {
     assertFalse(MathTools.isBetween(0.0, 0.1, 1.0));
   }
 
+  @Test
+  public void testModulus(){
+    assertEquals(MathTools.mod(0, 7), MathTools.mod(-7, 7));
+    assertEquals(MathTools.mod(1, 7), MathTools.mod(-6, 7));
+    assertEquals(MathTools.mod(2, 7), MathTools.mod(-5, 7));
+    assertEquals(MathTools.mod(3, 7), MathTools.mod(-4, 7));
+    assertEquals(MathTools.mod(4, 7), MathTools.mod(-3, 7));
+    assertEquals(MathTools.mod(5, 7), MathTools.mod(-2, 7));
+    assertEquals(MathTools.mod(6, 7), MathTools.mod(-1, 7));
+  }
 }

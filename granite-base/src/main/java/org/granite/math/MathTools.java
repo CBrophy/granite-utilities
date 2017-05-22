@@ -71,4 +71,13 @@ public final class MathTools implements Serializable {
     checkArgument(min < max, "min must be less than max");
     return min <= value && value <= max;
   }
+
+  public static int mod(final int numerator, final int denominator){
+    return (numerator % denominator + denominator) % denominator;
+  }
+
+  public static long mod(final long numerator, final long denominator){
+    return (numerator % denominator + denominator) % denominator;
+  }
+
 }
