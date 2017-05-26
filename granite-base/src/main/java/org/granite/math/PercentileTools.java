@@ -20,7 +20,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Ordering;
-import com.google.common.math.DoubleMath;
+import com.google.common.math.Stats;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +52,7 @@ public final class PercentileTools implements Serializable {
           == 0.0) { // it's a whole number, so just return the value at the zero-based index
         result[currentQuantile] = sortedValues.get(indexInteger - 1).doubleValue();
       } else {
-        result[currentQuantile] = DoubleMath
-            .mean(sortedValues.get(indexInteger - 1).doubleValue(),
+        result[currentQuantile] = Stats.meanOf(sortedValues.get(indexInteger - 1).doubleValue(),
                 sortedValues.get(indexInteger).doubleValue());
 
       }

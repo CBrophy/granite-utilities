@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import org.granite.base.ExceptionTools;
 
 public class GzipTools {
 
@@ -52,7 +53,7 @@ public class GzipTools {
       return memoryStream.toByteArray();
 
     } catch (IOException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     }
   }
 
@@ -65,7 +66,7 @@ public class GzipTools {
       return CharStreams.toString(reader);
 
     } catch (IOException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     }
   }
 

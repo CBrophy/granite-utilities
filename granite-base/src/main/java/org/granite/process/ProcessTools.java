@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
+import org.granite.base.ExceptionTools;
 
 public final class ProcessTools implements Serializable {
 
@@ -60,7 +61,7 @@ public final class ProcessTools implements Serializable {
 
       return inputRunnable.getStreamContents() + errorRunnable.getStreamContents();
     } catch (IOException | InterruptedException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     }
   }
 
@@ -91,7 +92,7 @@ public final class ProcessTools implements Serializable {
 
         successful = true;
       } catch (IOException e) {
-        throw Throwables.propagate(e);
+        throw ExceptionTools.checkedToRuntime(e);
       }
     }
 

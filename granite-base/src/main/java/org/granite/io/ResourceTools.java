@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
+import org.granite.base.ExceptionTools;
 import org.granite.base.StringTools;
 import org.granite.log.LogTools;
 
@@ -50,7 +51,7 @@ public final class ResourceTools implements Serializable {
 
       return Resources.asByteSource(resourceUrl).openStream();
     } catch (IOException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     } catch (IllegalArgumentException ignored) {
       LogTools.warn("Resource {0} does not exist", resourceName);
     }
@@ -94,7 +95,7 @@ public final class ResourceTools implements Serializable {
       return resultBuilder.build();
 
     } catch (IOException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     }
   }
 

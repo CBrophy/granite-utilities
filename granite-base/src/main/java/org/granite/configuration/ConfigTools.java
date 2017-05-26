@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.granite.base.ExceptionTools;
 import org.granite.base.StringTools;
 import org.granite.collections.MapTools;
 import org.granite.io.FileTools;
@@ -127,7 +128,7 @@ public final class ConfigTools implements Serializable {
           false);
 
     } catch (IOException e) {
-      throw Throwables.propagate(e);
+      throw ExceptionTools.checkedToRuntime(e);
     }
   }
 
