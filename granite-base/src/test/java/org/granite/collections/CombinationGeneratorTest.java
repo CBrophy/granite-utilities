@@ -6,9 +6,7 @@ import static org.junit.Assert.assertTrue;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.collect.Sets.SetView;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.junit.Test;
 
@@ -23,16 +21,16 @@ public class CombinationGeneratorTest {
   public void testComboGenerator() {
     final String[] elements = {"a", "b", "c", "d"};
     int[] indices;
-    final CombinationGenerator x = new CombinationGenerator(elements.length, 2);
+    final CombinationGenerator combinationGenerator = new CombinationGenerator(elements.length, 2);
     StringBuilder currentCombo = null;
     final Set<String> results = new HashSet<>();
     final Set<String> expected = ImmutableSet
         .of("ab","ac","ad","bc","bd", "cd");
 
-    while (x.hasMore()) {
+    while (combinationGenerator.hasMore()) {
       currentCombo = new StringBuilder();
 
-      indices = x.getNext();
+      indices = combinationGenerator.getNext();
 
       for (int i = 0; i < indices.length; i++) {
         currentCombo = currentCombo.append(elements[indices[i]]);

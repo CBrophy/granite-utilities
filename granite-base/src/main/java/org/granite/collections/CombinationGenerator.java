@@ -1,5 +1,7 @@
 package org.granite.collections;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import java.math.BigInteger;
 
 /**
@@ -7,7 +9,7 @@ import java.math.BigInteger;
  * Date: 5/26/17
  * Time: 9:47 AM
  *
- * Algorithm stolen mercilessly from Donald Knuth via daniweb *prostrates self*
+ * nCr algorithm stolen mercilessly from Donald Knuth *prostrates self*
  */
 public class CombinationGenerator {
 
@@ -17,85 +19,87 @@ public class CombinationGenerator {
   private BigInteger numLeft;
   private BigInteger total;
 
-  //------------
-// Constructor
-//------------
   public CombinationGenerator(int n, int r) {
-    if (r > n) {
-      throw new IllegalArgumentException();
-    }
-    if (n < 1) {
-      throw new IllegalArgumentException();
-    }
+    checkArgument(r <= n, "Combination length must be lte to the element count");
+    checkArgument(n > 0, "There must be at least 1 element");
+    checkArgument(r > 0, "Combination length must be a positive int");
+
     this.n = n;
     this.r = r;
+
     a = new int[r];
+
     BigInteger nFact = getFactorial(n);
+
     BigInteger rFact = getFactorial(r);
+
     BigInteger nminusrFact = getFactorial(n - r);
+
     total = nFact.divide(rFact.multiply(nminusrFact));
+
     reset();
   }
 
-  //------
-// Reset
-//------
   public void reset() {
+
     for (int i = 0; i < a.length; i++) {
       a[i] = i;
     }
+
     numLeft = new BigInteger(total.toString());
   }
 
-  //------------------------------------------------
-// Return number of combinations not yet generated
-//------------------------------------------------
+  /**
+   * Return number of combinations not yet generated
+   * @return
+   **/
   public BigInteger getNumLeft() {
     return numLeft;
   }
 
-  //-----------------------------
-// Are there more combinations?
-//-----------------------------
   public boolean hasMore() {
     return numLeft.compareTo(BigInteger.ZERO) == 1;
   }
 
-  //------------------------------------
-// Return total number of combinations
-//------------------------------------
   public BigInteger getTotal() {
     return total;
   }
 
-  //------------------
-// Compute factorial
-//------------------
   private static BigInteger getFactorial(int n) {
     BigInteger fact = BigInteger.ONE;
+
     for (int i = n; i > 1; i--) {
       fact = fact.multiply(new BigInteger(Integer.toString(i)));
     }
+
     return fact;
   }
 
-  //--------------------------------------------------------
-// Generate next combination (algorithm from Rosen p. 286)
-//--------------------------------------------------------
+  /**
+   * Generate next combination (algorithm from Rosen p. 286)
+   * @return
+   **/
   public int[] getNext() {
+
     if (numLeft.equals(total)) {
       numLeft = numLeft.subtract(BigInteger.ONE);
       return a;
     }
+
     int i = r - 1;
+
     while (a[i] == n - r + i) {
       i--;
     }
+
     a[i] = a[i] + 1;
+
     for (int j = i + 1; j < r; j++) {
       a[j] = a[i] + j - i;
     }
+
     numLeft = numLeft.subtract(BigInteger.ONE);
+
     return a;
   }
 }
