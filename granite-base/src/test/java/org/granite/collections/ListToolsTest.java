@@ -1,15 +1,17 @@
 package org.granite.collections;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.google.common.collect.ImmutableList;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import org.junit.Test;
 
 public class ListToolsTest {
@@ -130,9 +132,7 @@ public class ListToolsTest {
 
   private boolean checkResults(List<Integer> results, int... keys) {
 
-    final Set<Integer> testSet = results
-        .stream()
-        .collect(Collectors.toSet());
+    final Set<Integer> testSet = new HashSet<>(results);
 
     for (int key : keys) {
       if (!testSet.contains(key)) {
@@ -189,5 +189,17 @@ public class ListToolsTest {
 
     assertEquals(testList.size(), results.size());
 
+  }
+
+  @Test
+  public void testListMatch() {
+    final ImmutableList<Integer> l1 = ImmutableList.of(1, 2, 3, 4);
+    final ImmutableList<Integer> l2 = ImmutableList.of(4, 3, 2, 1);
+    final ImmutableList<Integer> l3 = ImmutableList.of(1, 2, 3, 4);
+    final ImmutableList<Integer> l4 = ImmutableList.of(2, 3, 4);
+
+    assertTrue(ListTools.listsMatch(l1, l3));
+    assertFalse(ListTools.listsMatch(l1, l2));
+    assertFalse(ListTools.listsMatch(l1, l4));
   }
 }

@@ -104,4 +104,23 @@ public class ListTools {
 
     return source.isEmpty() ? null : source.get(new Random().nextInt(source.size()));
   }
+
+  public static <T> boolean listsMatch(
+      final ImmutableList<T> list1,
+      final ImmutableList<T> list2) {
+    checkNotNull(list1, "list1");
+    checkNotNull(list2, "list2");
+
+    if (list1.size() != list2.size()) {
+      return false;
+    }
+
+    for (int index = 0; index < list1.size(); index++) {
+      if (!list1.get(index).equals(list2.get(index))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 }
