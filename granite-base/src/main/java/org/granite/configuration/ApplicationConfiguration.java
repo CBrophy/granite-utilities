@@ -56,7 +56,7 @@ public final class ApplicationConfiguration implements Serializable {
   public int getInt(final String configKey, final int defaultValue) {
     final String configValueString = getString(configKey, null);
 
-    return configValueString == null ? defaultValue : Integer.valueOf(configValueString);
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : Integer.valueOf(configValueString);
   }
 
   public long getLong(final String configKey) {
@@ -66,7 +66,7 @@ public final class ApplicationConfiguration implements Serializable {
   public long getLong(final String configKey, final long defaultValue) {
     final String configValueString = getString(configKey, null);
 
-    return configValueString == null ? defaultValue : Long.valueOf(configValueString);
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : Long.valueOf(configValueString);
   }
 
   public double getDouble(final String configKey) {
@@ -76,7 +76,7 @@ public final class ApplicationConfiguration implements Serializable {
   public double getDouble(final String configKey, final double defaultValue) {
     final String configValueString = getString(configKey, null);
 
-    return configValueString == null ? defaultValue : Double.valueOf(configValueString);
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : Double.valueOf(configValueString);
   }
 
   public boolean getBoolean(final String configKey) {
@@ -86,7 +86,7 @@ public final class ApplicationConfiguration implements Serializable {
   public boolean getBoolean(final String configKey, final boolean defaultValue) {
     final String configValueString = getString(configKey, null);
 
-    return configValueString == null ? defaultValue : Boolean.valueOf(configValueString);
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : Boolean.valueOf(configValueString);
   }
 
   public String getString(final String configKey) {
