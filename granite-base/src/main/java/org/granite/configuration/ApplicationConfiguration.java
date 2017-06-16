@@ -104,7 +104,7 @@ public final class ApplicationConfiguration implements Serializable {
 
     final String configValueString = configMap.get(configKey);
 
-    return configValueString == null ? defaultValue : configValueString;
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : configValueString;
   }
 
   public <V> V getValue(final String configKey,
@@ -112,7 +112,7 @@ public final class ApplicationConfiguration implements Serializable {
       final Function<String, V> valueConverter) {
     final String configValueString = configMap.get(configKey);
 
-    return configValueString == null ? defaultValue : valueConverter.apply(configValueString);
+    return StringTools.isNullOrEmpty(configValueString) ? defaultValue : valueConverter.apply(configValueString);
 
   }
 
