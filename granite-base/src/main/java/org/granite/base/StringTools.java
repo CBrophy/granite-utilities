@@ -24,6 +24,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -128,13 +129,22 @@ public final class StringTools implements Serializable {
         continue;
       }
 
-      // Lines are expected to have a maximum of 1 delimiter
-      // i.e. this = that where '=' is the delimiter
-      // such that lineParts should never be more than 2 units in size
-      final List<String> lineParts = keyValueSplitter
-          .trimResults()
-          .omitEmptyStrings()
-          .splitToList(trimmed);
+      final List<String> lineParts = new ArrayList<>();
+
+      int firstIndex = keyValueDelimiter.indexIn(trimmed);
+
+      if (firstIndex >= 0) {
+
+        if (firstIndex > 0) {
+          // add first half
+          lineParts.add(trimmed.substring(0, firstIndex));
+        }
+
+        if (firstIndex < trimmed.length() - 1) {
+          // add second half
+          lineParts.add(trimmed.substring(firstIndex + 1, trimmed.length()));
+        }
+      }
 
       checkState(lineParts.size() <= 2,
           "Too many %s delimiters on line: %s",

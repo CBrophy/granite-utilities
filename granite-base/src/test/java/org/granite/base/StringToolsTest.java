@@ -57,7 +57,7 @@ public class StringToolsTest {
 
   @Test
   public void testStringToMap() {
-    final String test1 = "k1=v1,k2=v2,k2=,k3=v3,k3=v4,k4=";
+    final String test1 = "k1=v1,k2=v2,k2=,k3=v3,k3=v4,k4=,k5=k4=";
 
     final Map<String, String> resultNoEmpty = StringTools.convertStringsToMap(
         test1,
@@ -66,7 +66,7 @@ public class StringToolsTest {
         true
     );
 
-    assertEquals(3, resultNoEmpty.size());
+    assertEquals(4, resultNoEmpty.size());
 
     final Map<String, String> resultEmpty = StringTools.convertStringsToMap(
         test1,
@@ -75,7 +75,7 @@ public class StringToolsTest {
         false
     );
 
-    assertEquals(4, resultEmpty.size());
+    assertEquals(5, resultEmpty.size());
 
     assertEquals("v1", resultNoEmpty.get("k1"));
     assertEquals("v2", resultNoEmpty.get("k2"));
@@ -85,6 +85,7 @@ public class StringToolsTest {
     assertEquals("", resultEmpty.get("k2"));
     assertEquals("v4", resultEmpty.get("k3"));
     assertEquals("", resultEmpty.get("k4"));
+    assertEquals("k4=", resultEmpty.get("k5"));
 
 
   }
