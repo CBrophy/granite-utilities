@@ -16,10 +16,10 @@
 
 package org.granite.io;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.io.Resources;
 import java.io.BufferedReader;
@@ -30,6 +30,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.zip.GZIPInputStream;
 import org.granite.base.ExceptionTools;
 import org.granite.base.StringTools;
@@ -59,44 +60,58 @@ public final class ResourceTools implements Serializable {
     return null;
   }
 
-  public static List<String> readResourceTextFile(final String resourceName) {
+  public static <T> List<T> readResourceTextFile(
+      final String resourceName,
+      final int skipRows,
+      final Function<String, Boolean> rowFilter,
+      final Function<String, T> rowDeserializer) {
 
     checkNotNull(resourceName, "resourceName");
+    checkArgument(resourceName.trim().length() > 0, "Resource name is empty");
+    checkNotNull(rowDeserializer, "rowDeserializer");
+    checkNotNull(rowFilter, "rowFilter");
 
-    try {
-      InputStream inputStream = readResource(resourceName);
+    final ImmutableList.Builder<T> resultBuilder = ImmutableList.builder();
 
-      if (inputStream == null) {
-        return ImmutableList.of();
-      }
+    final InputStream resourceStream = ResourceTools.readResource(resourceName);
 
-      LogTools.info("Reading from embedded resource: {0}", resourceName);
+    checkNotNull(resourceStream, "Could not load resource: %s", resourceName);
 
-      if (resourceName.endsWith(".gz")) {
-        inputStream = new GZIPInputStream(inputStream);
-      }
+    try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+        resourceName.endsWith(".gz") ? new GZIPInputStream(resourceStream) : resourceStream
+    ))) {
 
-      final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+      String line = null;
 
-      String line;
-
-      final ImmutableList.Builder<String> resultBuilder = ImmutableList.builder();
+      int rowCount = 0;
 
       while ((line = reader.readLine()) != null) {
-
-        final String trimmed = line.trim();
-
-        if (trimmed.length() > 0) {
-          resultBuilder.add(trimmed);
+        if (rowCount < skipRows) {
+          continue;
         }
 
-      }
+        if(rowFilter.apply(line)) {
+          resultBuilder.add(rowDeserializer.apply(line));
+        }
 
-      return resultBuilder.build();
+        rowCount++;
+      }
 
     } catch (IOException e) {
       throw ExceptionTools.checkedToRuntime(e);
     }
+
+    return resultBuilder.build();
+  }
+
+  public static List<String> readResourceTextFile(final String resourceName) {
+
+    return readResourceTextFile(
+        resourceName,
+        0,
+        row -> !StringTools.isNullOrEmpty(row),
+        String::trim
+    );
   }
 
   public static Map<String, String> readResourceTextFileAsMap(final String resourceName) {
