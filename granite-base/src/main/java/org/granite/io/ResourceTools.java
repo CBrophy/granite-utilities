@@ -86,12 +86,11 @@ public final class ResourceTools implements Serializable {
       int rowCount = 0;
 
       while ((line = reader.readLine()) != null) {
-        if (rowCount < skipRows) {
-          continue;
-        }
+        if (rowCount >= skipRows) {
 
-        if(rowFilter.apply(line)) {
-          resultBuilder.add(rowDeserializer.apply(line));
+          if (rowFilter.apply(line)) {
+            resultBuilder.add(rowDeserializer.apply(line));
+          }
         }
 
         rowCount++;
