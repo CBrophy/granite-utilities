@@ -19,6 +19,7 @@ package org.granite.io;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.io.Files;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -30,6 +31,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import org.granite.base.ExceptionTools;
@@ -96,5 +99,63 @@ public class FileTools {
     } else {
       return null;
     }
+  }
+
+  public static List<File> recursiveListDirectories(final String filePath) {
+    checkNotNull(filePath, "filePath");
+
+    final File source = new File(filePath);
+
+    final List<File> result = new ArrayList<>();
+
+    recursiveListContents(source, result, false);
+
+    return ImmutableList.copyOf(result);
+  }
+
+  public static List<File> recursiveListFiles(final String filePath) {
+    checkNotNull(filePath, "filePath");
+
+    final File source = new File(filePath);
+
+    final List<File> result = new ArrayList<>();
+
+    recursiveListContents(source, result, true);
+
+    return ImmutableList.copyOf(result);
+  }
+
+  private static void recursiveListContents(
+      final File filePath,
+      final List<File> inOut,
+      final boolean findFiles) {
+    checkNotNull(filePath, "filePath");
+
+    if (!filePath.exists()) {
+      return;
+    }
+
+    final File[] files = filePath.listFiles();
+
+    if (files == null || files.length == 0) {
+      return;
+    }
+
+    for (File file : files) {
+      if (file.isDirectory()) {
+
+        if (!findFiles) {
+          inOut.add(file);
+        }
+
+        recursiveListContents(file, inOut, findFiles);
+      } else if (file.isFile()) {
+
+        if (findFiles) {
+          inOut.add(file);
+        }
+      }
+    }
+
   }
 }
