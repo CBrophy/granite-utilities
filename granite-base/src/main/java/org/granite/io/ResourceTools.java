@@ -75,29 +75,32 @@ public final class ResourceTools implements Serializable {
 
     final InputStream resourceStream = ResourceTools.readResource(resourceName);
 
-    checkNotNull(resourceStream, "Could not load resource: %s", resourceName);
+    if(resourceStream != null) {
 
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-        resourceName.endsWith(".gz") ? new GZIPInputStream(resourceStream) : resourceStream
-    ))) {
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+          resourceName.endsWith(".gz") ? new GZIPInputStream(resourceStream) : resourceStream
+      ))) {
 
-      String line = null;
+        String line = null;
 
-      int rowCount = 0;
+        int rowCount = 0;
 
-      while ((line = reader.readLine()) != null) {
-        if (rowCount >= skipRows) {
+        while ((line = reader.readLine()) != null) {
+          if (rowCount >= skipRows) {
 
-          if (rowFilter.apply(line)) {
-            resultBuilder.add(rowDeserializer.apply(line));
+            if (rowFilter.apply(line)) {
+              resultBuilder.add(rowDeserializer.apply(line));
+            }
           }
+
+          rowCount++;
         }
 
-        rowCount++;
+      } catch (IOException e) {
+        throw ExceptionTools.checkedToRuntime(e);
       }
-
-    } catch (IOException e) {
-      throw ExceptionTools.checkedToRuntime(e);
+    } else {
+      LogTools.warn("Could not find embedded resource: {0}", resourceName);
     }
 
     return resultBuilder.build();
