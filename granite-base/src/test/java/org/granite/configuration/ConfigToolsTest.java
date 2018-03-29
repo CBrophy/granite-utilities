@@ -11,7 +11,7 @@ public class ConfigToolsTest {
     final ApplicationConfiguration applicationConfig = ConfigTools
         .readConfiguration(null, "test-config.properties", "test-config-2.properties");
 
-    assertEquals(5, applicationConfig.getConfigMap().size());
+    assertEquals(7, applicationConfig.getConfigMap().size());
     assertEquals("bar", applicationConfig.getString("test.val"));
     assertEquals("goodbye", applicationConfig.getString("test.val2"));
     assertEquals("old", applicationConfig.getString("test.old"));
