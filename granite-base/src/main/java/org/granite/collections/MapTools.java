@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public class MapTools {
 
@@ -59,15 +58,17 @@ public class MapTools {
       return ImmutableMap.of();
     }
 
-    final Map<K3, K1> keys1 = map1
-        .keySet()
-        .stream()
-        .collect(Collectors.toMap(key1Transform, key -> key));
+    final Map<K3, K1> keys1 = new HashMap<>();
 
-    final Map<K3, K2> keys2 = map2
+    map1
         .keySet()
-        .stream()
-        .collect(Collectors.toMap(key2Transform, key -> key));
+        .forEach(key -> keys1.put(key1Transform.apply(key), key));
+
+    final Map<K3, K2> keys2 = new HashMap<>();
+
+    map2
+        .keySet()
+        .forEach(key -> keys2.put(key2Transform.apply(key), key));
 
     final HashMap<K1, K2> result = new HashMap<>();
 
