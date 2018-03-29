@@ -121,7 +121,12 @@ public final class ResourceTools implements Serializable {
     checkNotNull(resourceName, "resourceName");
 
     return StringTools
-        .convertStringsToMap(readResourceTextFile(resourceName), CharMatcher.is('='), false);
+        .convertStringsToMap(readResourceTextFile(
+            resourceName,
+            0,
+            row -> !StringTools.isNullOrEmpty(row) && !row.trim().startsWith("#"),
+            String::trim
+            ), CharMatcher.is('='), false);
 
   }
 }
