@@ -55,11 +55,14 @@ public final class ProcessTools implements Serializable {
       inputThread.join();
       errorThread.join();
 
-      checkState(exitCode == 0, "Process returned an error state");
-      checkState(inputRunnable.isSuccessful(), "Failed to read input stream");
-      checkState(errorRunnable.isSuccessful(), "Failed to read error stream");
+      final String outputText = (inputRunnable.isSuccessful() ? inputRunnable.getStreamContents() : "")
+          + (errorRunnable.isSuccessful() ? errorRunnable.getStreamContents() : "");
 
-      return inputRunnable.getStreamContents() + errorRunnable.getStreamContents();
+      checkState(exitCode == 0, "Process returned an error state. Command output:\n\n%s", outputText);
+      checkState(inputRunnable.isSuccessful(), "Failed to read input stream. Command output:\n\n%s", outputText);
+      checkState(errorRunnable.isSuccessful(), "Failed to read error stream. Command output:\n\n%s", outputText);
+
+      return outputText;
     } catch (IOException | InterruptedException e) {
       throw ExceptionTools.checkedToRuntime(e);
     }
