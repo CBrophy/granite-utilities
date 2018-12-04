@@ -1,9 +1,10 @@
 *.class
+*.swp
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.ear
@@ -13,6 +14,7 @@ hs_err_pid*
 
 # idea cruft
 .idea
+*.iml
 classes/
 
 # build files
@@ -21,3 +23,19 @@ gradle
 build
 out
 
+# python virtualenv
+venv
+
+# local configs
+local-*properties
+
+# macOS cruft
+.DS_Store
+
+# vscode cruft
+.project
+.classpath
+.settings
+.vscode
+*/bin/main/
+*/bin/test/
