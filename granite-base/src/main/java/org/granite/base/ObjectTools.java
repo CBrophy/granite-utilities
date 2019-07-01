@@ -5,6 +5,7 @@ package org.granite.base;
  */
 public class ObjectTools {
 
+  @SafeVarargs
   public static <T> T firstNonNull(T...items){
     if(items != null) {
 
