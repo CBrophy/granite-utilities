@@ -15,6 +15,7 @@
  */
 package org.granite.base;
 
+import static com.google.common.base.CharMatcher.inRange;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -196,8 +197,8 @@ public final class StringTools implements Serializable {
 
     // Turn everything that is not a lower-case letter or number
     // into a space and collapse any groups to a single space
-    return CharMatcher
-        .javaLetter()
+    return inRange('a', 'z')
+        .or(inRange('A', 'Z'))
         .negate()
         .collapseFrom(wildText
             .toLowerCase(), ' ').trim();

@@ -27,7 +27,7 @@ subprojects {
     }
 
     dependencies {
-        compile 'com.google.guava:guava:21.0'
+        compile 'com.google.guava:guava:28.0-jre'
         testCompile 'junit:junit:4.12'
     }
 
