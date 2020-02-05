@@ -41,6 +41,7 @@ public final class ResourceTools implements Serializable {
   private ResourceTools() {
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   public static InputStream readResource(final String resourceName) {
     checkNotNull(resourceName, "resourceName");
 
