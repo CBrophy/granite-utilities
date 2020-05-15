@@ -26,6 +26,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableMap;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -202,6 +203,45 @@ public final class StringTools implements Serializable {
         .negate()
         .collapseFrom(wildText
             .toLowerCase(), ' ').trim();
+  }
+
+  public static int levenshtein(
+      final String first,
+      final String second) {
+    checkNotNull(first,"first");
+    checkNotNull(second,"second");
+
+    int[][] distance = new int[first.length() + 1][second.length() + 1];
+
+    if(Math.min(first.length(),second.length()) == 0){
+      return Math.abs(first.length() - second.length());
+    }
+
+    for (int i = 0; i <= first.length(); i++) {
+      for (int j = 0; j <= second.length(); j++) {
+        if (i == 0) {
+          distance[i][j] = j;
+        } else if (j == 0) {
+          distance[i][j] = i;
+        } else {
+          distance[i][j] = min(distance[i - 1][j - 1]
+                  + costOfSubstitution(first.charAt(i - 1), second.charAt(j - 1)),
+              distance[i - 1][j] + 1,
+              distance[i][j - 1] + 1);
+        }
+      }
+    }
+
+    return distance[first.length()][second.length()];
+  }
+
+  private static int costOfSubstitution(char a, char b) {
+    return a == b ? 0 : 1;
+  }
+
+  private static int min(int... numbers) {
+    return Arrays.stream(numbers)
+        .min().orElse(Integer.MAX_VALUE);
   }
 
 }

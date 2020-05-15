@@ -89,4 +89,12 @@ public class StringToolsTest {
 
 
   }
+
+  @Test
+  public void testLevenshtein(){
+    assertEquals(4,StringTools.levenshtein("book",""));
+    assertEquals(2,StringTools.levenshtein("book","back"));
+    assertEquals(1,StringTools.levenshtein("pins","pines"));
+    assertEquals(4,StringTools.levenshtein("emit","time"));
+  }
 }
