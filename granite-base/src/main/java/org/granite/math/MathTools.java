@@ -16,6 +16,7 @@
 package org.granite.math;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.math.DoubleMath;
 import java.io.Serializable;
@@ -72,12 +73,84 @@ public final class MathTools implements Serializable {
     return min <= value && value <= max;
   }
 
-  public static int mod(final int numerator, final int denominator){
+  public static int mod(final int numerator, final int denominator) {
     return (numerator % denominator + denominator) % denominator;
   }
 
-  public static long mod(final long numerator, final long denominator){
+  public static long mod(final long numerator, final long denominator) {
     return (numerator % denominator + denominator) % denominator;
+  }
+
+  public static int min(int... values) {
+    checkNotNull(values, "values");
+
+    int min = Integer.MAX_VALUE;
+
+    for (int value : values) {
+      min = Math.min(min, value);
+    }
+
+    return min;
+  }
+
+  public static long min(long... values) {
+    checkNotNull(values, "values");
+
+    long min = Long.MAX_VALUE;
+
+    for (long value : values) {
+      min = Math.min(min, value);
+    }
+
+    return min;
+  }
+
+  public static double min(double... values) {
+    checkNotNull(values, "values");
+
+    double min = Double.MAX_VALUE;
+
+    for (double value : values) {
+      min = Math.min(min, value);
+    }
+
+    return min;
+  }
+
+  public static int max(int... values) {
+    checkNotNull(values, "values");
+
+    int max = Integer.MIN_VALUE;
+
+    for (int value : values) {
+      max = Math.max(max, value);
+    }
+
+    return max;
+  }
+
+  public static long max(long... values) {
+    checkNotNull(values, "values");
+
+    long max = Long.MIN_VALUE;
+
+    for (long value : values) {
+      max = Math.max(max, value);
+    }
+
+    return max;
+  }
+
+  public static double max(double... values) {
+    checkNotNull(values, "values");
+
+    double max = Double.MIN_VALUE * -1.0;
+
+    for (double value : values) {
+      max = Math.max(max, value);
+    }
+
+    return max;
   }
 
 }

@@ -96,5 +96,6 @@ public class StringToolsTest {
     assertEquals(2,StringTools.levenshtein("book","back"));
     assertEquals(1,StringTools.levenshtein("pins","pines"));
     assertEquals(4,StringTools.levenshtein("emit","time"));
+    assertEquals(8,StringTools.levenshtein("emit","sauvignon"));
   }
 }

@@ -65,7 +65,7 @@ public class MathToolsTest {
   }
 
   @Test
-  public void testModulus(){
+  public void testModulus() {
     assertEquals(MathTools.mod(0, 7), MathTools.mod(-7, 7));
     assertEquals(MathTools.mod(1, 7), MathTools.mod(-6, 7));
     assertEquals(MathTools.mod(2, 7), MathTools.mod(-5, 7));
@@ -73,5 +73,19 @@ public class MathToolsTest {
     assertEquals(MathTools.mod(4, 7), MathTools.mod(-3, 7));
     assertEquals(MathTools.mod(5, 7), MathTools.mod(-2, 7));
     assertEquals(MathTools.mod(6, 7), MathTools.mod(-1, 7));
+  }
+
+  @Test
+  public void testMin() {
+    assertEquals(-15, MathTools.min(-6, 99, 100, -15, 0, 267));
+    assertEquals(-15L, MathTools.min(-6L, 99L, 100L, -15L, 267L));
+    assertEquals(-15.0, MathTools.min(-6.0, 99.0, 100.0, -15.0, 267.0), 0.00000001);
+  }
+
+  @Test
+  public void testMax() {
+    assertEquals(267, MathTools.max(-6, 99, 100, -15, 0, 267));
+    assertEquals(267L, MathTools.max(-6L, 99L, 100L, -15L, 267L));
+    assertEquals(267.0, MathTools.max(-6.0, 99.0, 100.0, -15.0, 267.0), 0.00000001);
   }
 }
