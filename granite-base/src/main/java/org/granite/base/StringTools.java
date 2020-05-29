@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 public final class StringTools implements Serializable {
@@ -274,55 +275,44 @@ public final class StringTools implements Serializable {
 
     final List<String> result = new ArrayList<>();
 
-    int start = 0;
-    int splitCount = 0;
+    final TreeSet<Integer> splits = new TreeSet<>();
+
     boolean qualified = false;
 
     int index = 0;
     while (index < line.length()) {
       char current = line.charAt(index);
 
-      if (index == 0 && delimiter.matches(current) ) {
-        //edge case: first character is the delimiter
-        result.add("");
-        splitCount++;
-      }
-
       if (textQualifier.matches(current)) {
         qualified = !qualified;
       }
 
       if (delimiter.matches(current) && !qualified) {
-        splitCount++;
-        result.add(
-            clean(line.substring(start, index), textQualifier, trimResults)
-        );
-        start = index + 1;
-      }
-
-      //edge case: end of string
-      if (index == line.length() - 1) {
-
-        if (!delimiter.matches(current)) {
-//          //edge case: last character is the delimiter
-//          result.add("");
-//        } else {
-          result.add(
-              clean(line.substring(start), textQualifier, trimResults)
-          );
-        } else if(splitCount != result.size() - 1){
-          result.add("");
-        }
-        break;
+        splits.add(index);
       }
 
       index++;
     }
 
+    int start = 0;
+
+    checkState(!qualified, "Unmatched qualifier in line: %s", line);
+
+    for (Integer split : splits) {
+      result.add(cleanSplit(line.substring(start, split), textQualifier,trimResults));
+      start=split+1;
+    }
+
+    if(start < line.length()-1){
+      result.add(cleanSplit(line.substring(start), textQualifier,trimResults));
+    } else {
+      result.add("");
+    }
+
     return result;
   }
 
-  private static String clean(
+  private static String cleanSplit(
       final String value,
       final CharMatcher textQualifier,
       final boolean trimResults){
