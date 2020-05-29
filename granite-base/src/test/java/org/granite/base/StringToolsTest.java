@@ -120,6 +120,11 @@ public class StringToolsTest {
 
     checkSplits("\",\"", new String[]{","});
 
+    checkSplits(
+        "\"hello\",world,,again,",
+        new String[]{"hello","world","","again",""}
+    );
+
     try {
       List<String> parts = StringTools
           .textQualifiedStringSplit(

@@ -246,6 +246,20 @@ public final class StringTools implements Serializable {
 
   public static List<String> textQualifiedStringSplit(
       final String line,
+      final char delimiter,
+      final char textQualifier,
+      final boolean trimResults
+  ) {
+    return textQualifiedStringSplit(
+        line,
+        CharMatcher.is(delimiter),
+        CharMatcher.is(textQualifier),
+        trimResults
+    );
+  }
+
+  public static List<String> textQualifiedStringSplit(
+      final String line,
       final CharMatcher delimiter,
       final CharMatcher textQualifier,
       final boolean trimResults
@@ -261,6 +275,7 @@ public final class StringTools implements Serializable {
     final List<String> result = new ArrayList<>();
 
     int start = 0;
+    int splitCount = 0;
     boolean qualified = false;
 
     int index = 0;
@@ -270,21 +285,7 @@ public final class StringTools implements Serializable {
       if (index == 0 && delimiter.matches(current) ) {
         //edge case: first character is the delimiter
         result.add("");
-      }
-        //edge case: end of string
-      if (index == line.length() - 1) {
-
-        checkState(!textQualifier.matches(current) || qualified,"Unterminated qualifier in %s",line);
-
-        if (delimiter.matches(current)) {
-          //edge case: last character is the delimiter
-          result.add("");
-        } else {
-          result.add(
-              clean(line.substring(start), textQualifier, trimResults)
-          );
-        }
-        break;
+        splitCount++;
       }
 
       if (textQualifier.matches(current)) {
@@ -292,10 +293,27 @@ public final class StringTools implements Serializable {
       }
 
       if (delimiter.matches(current) && !qualified) {
+        splitCount++;
         result.add(
             clean(line.substring(start, index), textQualifier, trimResults)
         );
         start = index + 1;
+      }
+
+      //edge case: end of string
+      if (index == line.length() - 1) {
+
+        if (!delimiter.matches(current)) {
+//          //edge case: last character is the delimiter
+//          result.add("");
+//        } else {
+          result.add(
+              clean(line.substring(start), textQualifier, trimResults)
+          );
+        } else if(splitCount != result.size() - 1){
+          result.add("");
+        }
+        break;
       }
 
       index++;
