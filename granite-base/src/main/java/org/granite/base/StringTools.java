@@ -208,12 +208,12 @@ public final class StringTools implements Serializable {
   public static int levenshtein(
       final String first,
       final String second) {
-    checkNotNull(first,"first");
-    checkNotNull(second,"second");
+    checkNotNull(first, "first");
+    checkNotNull(second, "second");
 
     int[][] distance = new int[first.length() + 1][second.length() + 1];
 
-    if(Math.min(first.length(),second.length()) == 0){
+    if (Math.min(first.length(), second.length()) == 0) {
       return Math.abs(first.length() - second.length());
     }
 
@@ -242,6 +242,73 @@ public final class StringTools implements Serializable {
   private static int min(int... numbers) {
     return Arrays.stream(numbers)
         .min().orElse(Integer.MAX_VALUE);
+  }
+
+  public static List<String> textQualifiedStringSplit(
+      final String line,
+      final CharMatcher delimiter,
+      final CharMatcher textQualifier,
+      final boolean trimResults
+  ) {
+    checkNotNull(line, "line");
+    checkNotNull(delimiter, "delimiter");
+    checkNotNull(textQualifier, "textQualifier");
+
+    if (textQualifier.removeFrom(line).trim().isEmpty()) {
+      return new ArrayList<>();
+    }
+
+    final List<String> result = new ArrayList<>();
+
+    int start = 0;
+    boolean qualified = false;
+
+    int index = 0;
+    while (index < line.length()) {
+      char current = line.charAt(index);
+
+      if (index == 0 && delimiter.matches(current) ) {
+        //edge case: first character is the delimiter
+        result.add("");
+      }
+        //edge case: end of string
+      if (index == line.length() - 1) {
+
+        checkState(!textQualifier.matches(current) || qualified,"Unterminated qualifier in %s",line);
+
+        if (delimiter.matches(current)) {
+          //edge case: last character is the delimiter
+          result.add("");
+        } else {
+          result.add(
+              clean(line.substring(start), textQualifier, trimResults)
+          );
+        }
+        break;
+      }
+
+      if (textQualifier.matches(current)) {
+        qualified = !qualified;
+      }
+
+      if (delimiter.matches(current) && !qualified) {
+        result.add(
+            clean(line.substring(start, index), textQualifier, trimResults)
+        );
+        start = index + 1;
+      }
+
+      index++;
+    }
+
+    return result;
+  }
+
+  private static String clean(
+      final String value,
+      final CharMatcher textQualifier,
+      final boolean trimResults){
+    return trimResults ? textQualifier.removeFrom(value).trim() : textQualifier.removeFrom(value);
   }
 
 }
