@@ -120,6 +120,8 @@ public class StringToolsTest {
 
     checkSplits("\",\"", new String[]{","});
 
+    checkSplits("Y,Y,Y", new String[]{"Y","Y","Y"});
+
     checkSplits(
         "\"hello\",world,,again,",
         new String[]{"hello","world","","again",""}

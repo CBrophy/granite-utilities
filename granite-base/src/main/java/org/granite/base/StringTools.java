@@ -303,7 +303,7 @@ public final class StringTools implements Serializable {
       start=split+1;
     }
 
-    if(start < line.length()-1){
+    if(start < line.length()){
       result.add(cleanSplit(line.substring(start), textQualifier,trimResults));
     } else {
       result.add("");
