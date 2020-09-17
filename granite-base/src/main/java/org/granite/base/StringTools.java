@@ -299,12 +299,12 @@ public final class StringTools implements Serializable {
     checkState(!qualified, "Unmatched qualifier in line: %s", line);
 
     for (Integer split : splits) {
-      result.add(cleanSplit(line.substring(start, split), textQualifier,trimResults));
-      start=split+1;
+      result.add(cleanSplit(line.substring(start, split), textQualifier, trimResults));
+      start = split + 1;
     }
 
-    if(start < line.length()){
-      result.add(cleanSplit(line.substring(start), textQualifier,trimResults));
+    if (start < line.length()) {
+      result.add(cleanSplit(line.substring(start), textQualifier, trimResults));
     } else {
       result.add("");
     }
@@ -315,8 +315,25 @@ public final class StringTools implements Serializable {
   private static String cleanSplit(
       final String value,
       final CharMatcher textQualifier,
-      final boolean trimResults){
+      final boolean trimResults) {
     return trimResults ? textQualifier.removeFrom(value).trim() : textQualifier.removeFrom(value);
+  }
+
+  public static boolean containsAny(final String value, final String... searchStrings) {
+    checkNotNull(value, "value");
+    checkNotNull(searchStrings, "searchStrings");
+
+    for (String searchString : searchStrings) {
+      checkNotNull(searchString, "searchString");
+
+      if(searchString.length() == 0 || searchString.length() > value.length()) continue;
+
+      if (value.contains(searchString)) {
+        return true;
+      }
+    }
+
+    return false;
   }
 
 }

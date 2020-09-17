@@ -158,4 +158,13 @@ public class StringToolsTest {
       assertEquals(expected[index],parts.get(index));
     }
   }
+
+  @Test
+  public void testContainsAny(){
+    String test = "the quick brown fox jumped over the lazy dog";
+
+    assertTrue(StringTools.containsAny(test, "tree","dog","cat"));
+    assertFalse(StringTools.containsAny(test, "","burger","mouse"));
+    assertFalse(StringTools.containsAny(test, ""));
+  }
 }
